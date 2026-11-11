@@ -401,6 +401,21 @@ input[type="date"].inp{display:flex;align-items:center;text-align:left;line-heig
 input[type="date"].inp::-webkit-date-and-time-value{text-align:left}
 input[type="date"].inp::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.6}
 
+/* entrada con contraseña */
+.login{position:fixed;inset:0;z-index:150;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow-y:auto;padding:calc(var(--st) + 24px) 24px calc(var(--sb) + 24px)}
+.lg{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:stretch}
+.lgic{width:64px;height:64px;border-radius:20px;background:var(--card);display:grid;place-items:center;margin:0 auto 18px}
+.lgic svg{width:30px;height:30px;stroke-width:1.8}
+.lg h1{margin:0;text-align:center;font-size:30px;font-weight:700;letter-spacing:-.022em}
+.lgsub{margin:8px 4px 26px;text-align:center;color:var(--muted);font-size:15.5px;line-height:1.45}
+.lgbtn{height:50px;border-radius:14px;font-size:17px;margin-top:4px;width:100%}
+.lgbtn:disabled{opacity:.6}
+.lglater{margin:14px auto 0;color:var(--muted)}
+.lg .err{text-align:center}
+.steps{margin:4px 0 14px;padding-left:22px;color:#e5e5ea;font-size:16px;line-height:1.5}
+.steps li{margin-bottom:10px}
+.steps b{color:#fff}
+
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{transition-duration:.01ms!important;animation:none!important}
 }
@@ -520,6 +535,8 @@ function safeUrl(u){
   if (/^(javascript|data|vbscript|blob|file):/i.test(u)) return '';
   return u;
 }
+
+const isWeb = u => /^https?:/i.test(safeUrl(u));
 
 const tf = new Intl.DateTimeFormat('es-ES', { hour: '2-digit', minute: '2-digit' });
 const df = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' });
@@ -704,7 +721,7 @@ async function attempt(ref, op){
   }
 }
 function localOverride(path){ const w = P.writers.get(path); return w ? (w.next || w.waiting) : null; }
-const isSaving = () => P.writers.size > 0 || localTimer !== null;
+const isSaving = () => P.writers.size > 0 || localTimer !== null || SS.out.size > 0;
 
 function subHome(){
   if (P.unsubHome) P.unsubHome();
@@ -770,6 +787,7 @@ function goReadonly(msg){
 
 function waitClaude(){
   return new Promise(res => {
+    if (standalone && !window.claude) return res(null);   // fuera de claude.ai no hay que esperar
     let n = 0;
     (function check(){
       const c = window.claude;
@@ -780,6 +798,7 @@ function waitClaude(){
   });
 }
 async function connect(){
+  if (sheetsWanted()) return connectSheets();
   const c = await waitClaude();
   if (!c) return startLocal(false);
   let db = null, user = null, uid = null;
@@ -824,6 +843,369 @@ function setBanner(msg){
 let syncListeners = [];
 function syncChanged(){ syncListeners.forEach(f => f()); }
 
+/* ================= sincronización con Google Sheets ================= */
+// Fuera de claude.ai (en GitHub Pages) la app guarda en una hoja de Google a través de un
+// Apps Script publicado como aplicación web (Codigo.gs). Para entrar hace falta la contraseña,
+// que solo conoce el script; aquí se guarda únicamente un token de sesión de este dispositivo.
+// SS imita la interfaz de la base de datos de claude.ai (doc, collection, set, delete, onSnapshot)
+// para reutilizar toda la lógica de la app.
+const SERVIDOR_URL = 'https://script.google.com/macros/s/AKfycbw2PhJSrWks__ICFd_5jqjDDayJuBMfUkUoGJY0UrJX1nQ4KTwKmx-qwIZrSwfVHoibSA/exec';                      // dirección /exec del Apps Script (no es secreta)
+const K_SRV = 'miespacio.servidor.v1';        // dirección pegada en este navegador, si no está arriba
+const K_SES = 'miespacio.sesion.v1';          // token de sesión de este dispositivo
+const K_HOJA = 'miespacio.hoja.v1';           // última copia de la hoja, para abrir rápido y sin conexión
+const K_OUT = 'miespacio.pendientes.v1';      // cambios que la hoja todavía no ha confirmado
+const K_LOCAL_HECHO = 'miespacio.local.subido';
+const POLL_MS = 20000;
+const standalone = (() => { try { return window.top === window.self; } catch (e) { return false; } })();
+const SRV_RE = /^(https:\/\/\S+|http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/\S*)$/i;
+const serverUrl = () => { const u = SERVIDOR_URL || ls.get(K_SRV) || ''; return SRV_RE.test(u) ? u : ''; };
+const sheetsWanted = () => standalone && !!serverUrl();
+
+function deviceName(){
+  const u = navigator.userAgent || '';
+  const d = /iPhone/.test(u) ? 'iPhone' : /iPad/.test(u) ? 'iPad' : /Android/.test(u) ? 'Android' : /Mac/.test(u) ? 'Mac' : /Windows/.test(u) ? 'Windows' : /Linux/.test(u) ? 'Linux' : 'Dispositivo';
+  const b = /Edg\//.test(u) ? 'Edge' : /CriOS|Chrome\//.test(u) ? 'Chrome' : /FxiOS|Firefox\//.test(u) ? 'Firefox' : /Safari\//.test(u) ? 'Safari' : '';
+  return b ? `${d} · ${b}` : d;
+}
+
+const SS = {
+  rev: 0, docs: new Map(), out: new Map(), seqN: 0,
+  ready: false, listeners: { app: [], col: [] }, emitT: null,
+  busy: false, again: false, pushT: null, pollT: null, sending: new Set(),
+  lastOk: 0, lastErr: '', authFailed: false, firstFull: false, started: false,
+
+  load(){
+    const c = ls.get(K_HOJA);
+    if (c && c.docs && typeof c.docs === 'object') {
+      this.rev = Number(c.rev) || 0;
+      for (const [k, v] of Object.entries(c.docs)) if (v && typeof v === 'object') this.docs.set(k, v);
+      this.ready = this.rev > 0 || this.docs.size > 0 || !!c.ok;
+      this.lastOk = Number(c.at) || 0;
+    }
+    const o = ls.get(K_OUT);
+    if (o && typeof o === 'object') for (const [k, v] of Object.entries(o)) if (v && typeof v === 'object') { this.out.set(k, v); this.seqN = Math.max(this.seqN, v.s || 0); }
+  },
+  saveCache(){ if (!ls.set(K_HOJA, { rev: this.rev, ok: 1, at: this.lastOk, docs: Object.fromEntries(this.docs) })) console.warn('No cabe la copia local'); },
+  saveOut(){ if (!ls.set(K_OUT, Object.fromEntries(this.out))) toast('No se pudo guardar el cambio en este dispositivo', 'x'); },
+  view(k){
+    const o = this.out.get(k);
+    if (o) return o.del ? null : o.j;
+    const d = this.docs.get(k);
+    return d && !d.d ? d.j : null;
+  },
+  snapshot(){
+    const entries = [];
+    const keys = new Set([...this.docs.keys(), ...this.out.keys()]);
+    for (const k of keys) { if (!k.startsWith('e:')) continue; const j = this.view(k); if (j) entries.push({ id: k.slice(2), ...j }); }
+    return { home: this.view('app'), entries };
+  },
+
+  /* --- interfaz tipo base de datos --- */
+  write(k, data, del){
+    const prev = this.out.get(k);
+    const known = this.docs.get(k);
+    if (del && !known && prev && !this.sending.has(k)) { this.out.delete(k); this.saveOut(); this.emit(); return Promise.resolve(); }
+    const b = prev ? prev.b : (known ? known.v : 0);
+    this.out.set(k, { b, del: del ? 1 : 0, j: del ? null : clone(data), t: Date.now(), s: ++this.seqN });
+    this.saveOut();
+    this.emit();
+    clearTimeout(this.pushT);
+    this.pushT = setTimeout(() => this.sync(), 700);
+    return Promise.resolve();
+  },
+  ref(k, path){
+    const self = this;
+    return {
+      path, id: k.replace(/^e:/, ''),
+      set: d => self.write(k, d, false),
+      delete: () => self.write(k, null, true),
+      onSnapshot(cb){ self.listeners.app.push(cb); self.emit(); return () => { self.listeners.app = self.listeners.app.filter(f => f !== cb); }; },
+      collection(){ return self.colRef; },
+    };
+  },
+  get colRef(){
+    const self = this;
+    return {
+      path: 'hoja/entries',
+      doc: id => self.ref('e:' + id, 'hoja/entries/' + id),
+      onSnapshot(cb){ self.listeners.col.push(cb); self.emit(); return () => { self.listeners.col = self.listeners.col.filter(f => f !== cb); }; },
+    };
+  },
+  emit(){
+    if (this.emitT) return;
+    this.emitT = setTimeout(() => {
+      this.emitT = null;
+      const meta = { fromCache: !this.ready };
+      const app = this.view('app');
+      const hs = { exists: !!app, data: () => clone(app), metadata: meta };
+      this.listeners.app.forEach(f => f(hs));
+      const docs = [];
+      const keys = new Set([...this.docs.keys(), ...this.out.keys()]);
+      for (const k of keys) { if (!k.startsWith('e:')) continue; const j = this.view(k); if (j) docs.push({ id: k.slice(2), exists: true, data: () => clone(j) }); }
+      const cs = { docs, empty: !docs.length, metadata: meta };
+      this.listeners.col.forEach(f => f(cs));
+      syncChanged();
+    }, 0);
+  },
+
+  /* --- red --- */
+  async request(body, { keepalive = false, timeout = 30000 } = {}){
+    const url = serverUrl();
+    if (!url) throw { code: 'config' };
+    const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+    const timer = ctrl ? setTimeout(() => ctrl.abort(), timeout) : null;
+    const payload = JSON.stringify(body);
+    try {
+      const res = await fetch(url, { method: 'POST', body: payload, headers: { 'Content-Type': 'text/plain;charset=utf-8' }, credentials: 'omit', redirect: 'follow', cache: 'no-store', keepalive: keepalive && payload.length < 60000, signal: ctrl ? ctrl.signal : undefined });
+      const txt = await res.text();
+      let j = null; try { j = JSON.parse(txt); } catch (e) { j = null; }
+      if (!j) throw { code: 'respuesta' };
+      return j;
+    } catch (e) {
+      if (e && e.code) throw e;
+      throw { code: 'red' };
+    } finally { if (timer) clearTimeout(timer); }
+  },
+  token(){ return ls.get(K_SES) || ''; },
+
+  async sync(){
+    if (!this.token() || this.authFailed) return;
+    if (this.busy) { this.again = true; return; }
+    this.busy = true;
+    try {
+      do {
+        this.again = false;
+        await this.push();
+        await this.pull();
+      } while (this.again && !this.authFailed);
+      this.lastErr = '';
+    } catch (e) {
+      this.lastErr = e && e.code || 'red';
+      if (this.lastErr === 'auth') this.onAuthLost();
+    } finally {
+      this.busy = false;
+      syncChanged();
+    }
+  },
+  check(r){
+    if (r && r.ok) return r;
+    const code = r && r.error || 'servidor';
+    throw { code, msg: r && r.msg };
+  },
+  async pull(){
+    const r = this.check(await this.request({ op: 'pull', token: this.token(), since: this.rev }));
+    this.lastOk = Date.now();
+    if (!r.same) {
+      if (r.full) {
+        this.docs = new Map();
+        this.firstFull = true;
+      }
+      for (const it of r.items || []) {
+        if (typeof it.k !== 'string') continue;
+        if (it.d) this.docs.set(it.k, { v: it.v, d: 1 });
+        else this.docs.set(it.k, { v: it.v, j: it.j });
+      }
+      this.rev = Number(r.rev) || 0;
+    }
+    const wasReady = this.ready;
+    this.ready = true;
+    this.saveCache();
+    if (!r.same || !wasReady) this.emit();
+    if (!wasReady || r.full) setTimeout(offerLocalData, 300);
+  },
+  async push(){
+    for (let round = 0; round < 50; round++) {
+      const batch = [];
+      let size = 0;
+      for (const [k, o] of this.out) {
+        if (batch.length >= 150 || size > 3e6) break;
+        batch.push([k, o.s]);
+        const json = o.del ? '' : JSON.stringify(o.j);
+        size += json.length;
+      }
+      if (!batch.length) return;
+      const changes = batch.map(([k]) => { const o = this.out.get(k); return { k, b: o.b, del: o.del, t: o.t, j: o.del ? undefined : o.j }; });
+      batch.forEach(([k]) => this.sending.add(k));
+      let r;
+      try { r = this.check(await this.request({ op: 'push', token: this.token(), changes }, { timeout: 60000 })); }
+      finally { this.sending.clear(); }
+      const byK = new Map((r.res || []).map(x => [x.k, x]));
+      let conflicts = 0, rejected = 0;
+      for (const [k, s] of batch) {
+        const x = byK.get(k), o = this.out.get(k);
+        if (!x || !o) continue;
+        const sent = changes.find(c => c.k === k);
+        if (x.ok) {
+          if (sent.del) this.docs.set(k, { v: x.v, d: 1 }); else this.docs.set(k, { v: x.v, j: sent.j });
+          if (o.s === s) this.out.delete(k); else o.b = x.v;
+        } else if (x.error === 'conflicto') {
+          conflicts++;
+          this.docs.set(k, x.d ? { v: x.v, d: 1 } : { v: x.v, j: x.j });
+          if (o.s !== s) { o.b = x.v; continue; }
+          this.out.delete(k);
+          resolveConflict(k, sent, x);
+        } else {
+          rejected++;
+          this.out.delete(k);
+        }
+      }
+      this.saveOut(); this.saveCache(); this.emit();
+      if (conflicts) toast(conflicts === 1 ? 'Otro dispositivo cambió lo mismo: se ha conservado su versión' : `${conflicts} cambios chocaban con otro dispositivo`, 'info');
+      if (rejected) toast(rejected === 1 ? 'La hoja rechazó un cambio (demasiado grande o no válido)' : `La hoja rechazó ${rejected} cambios`, 'x');
+    }
+  },
+  flushKeepalive(){
+    if (!this.out.size || !this.token() || this.authFailed) return;
+    const changes = [];
+    for (const [k, o] of this.out) { if (changes.length >= 40) break; changes.push({ k, b: o.b, del: o.del, t: o.t, j: o.del ? undefined : o.j }); }
+    // Si el navegador cierra la página, el envío sigue; la respuesta se pierde, pero al volver
+    // se reenvía y el servidor ve que ya lo tiene (mismo contenido) y no lo duplica.
+    this.request({ op: 'push', token: this.token(), changes }, { keepalive: true }).catch(() => {});
+  },
+  start(){
+    if (this.started) return;
+    this.started = true;
+    this.sync();
+    this.pollT = setInterval(() => { if (document.visibilityState === 'visible') this.sync(); }, POLL_MS);
+    window.addEventListener('online', () => this.sync());
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') this.sync(); else this.flushKeepalive(); });
+  },
+  onAuthLost(){
+    this.authFailed = true;
+    ls.set(K_SES, '');
+    showLogin({ expired: true });
+  },
+};
+
+// Si otro dispositivo cambió lo mismo, nunca se pierde nada en silencio.
+function resolveConflict(k, sent, x){
+  if (k === 'app') {
+    if (sent.del || !sent.j) return;
+    const srv = x.d ? null : cleanHome(x.j);
+    if (!srv) { SS.write('app', sent.j, false); return; }
+    // Se queda el inicio del otro dispositivo y se añaden las carpetas nuevas de este.
+    let added = 0;
+    const mine = cleanHome(sent.j);
+    for (const id of mine.order) if (!srv.items[id]) { srv.items[id] = mine.items[id]; srv.order.push(id); added++; }
+    if (added) SS.write('app', srv, false);
+    return;
+  }
+  if (sent.del) return;                       // lo borraste aquí pero se cambió allí: se conserva
+  if (x.d) { SS.write(k, sent.j, false); return; }   // lo borraron allí pero lo cambiaste aquí: se recupera
+  const it = S.home.items[sent.j.folder];
+  const a = x.j || {}, b = sent.j;
+  if (it && (it.kind === 'notes' || it.kind === 'copy') && (a.title !== b.title || a.body !== b.body)) {
+    const nid = newId();
+    SS.write('e:' + nid, { ...b, title: ((b.title || firstLine(b.body) || 'Nota') + ' (conflicto)').slice(0, 300), pos: (b.pos || 0) + 1, updated: Date.now() }, false);
+    toast('Una nota se cambió en dos sitios: se guardaron las dos versiones', 'info');
+  }
+}
+
+// Datos que había solo en este navegador (modo local de antes): ofrecer subirlos.
+async function offerLocalData(){
+  if (ls.get(K_LOCAL_HECHO)) return;
+  const loc = ls.get(K_LOCAL);
+  if (!loc || !loc.home) { ls.set(K_LOCAL_HECHO, 1); return; }
+  const home = cleanHome(loc.home);
+  const list = Array.isArray(loc.entries) ? loc.entries.filter(e => e && typeof e.id === 'string' && ID_RE.test(e.id) && home.items[e.folder]) : [];
+  if (!list.length && JSON.stringify(home.order) === JSON.stringify(defaultHome().order)) { ls.set(K_LOCAL_HECHO, 1); return; }
+  const empty = !SS.view('app') && ![...SS.docs.keys()].some(k => k.startsWith('e:') && SS.view(k));
+  const ok = empty || await confirmDialog({ title: '¿Subir lo de este navegador?', message: `Hay ${plural(list.length, 'elemento guardado', 'elementos guardados')} solo en este navegador. Se añadirán a la hoja sin borrar nada.`, ok: 'Subir', danger: false });
+  ls.set(K_LOCAL_HECHO, 1);
+  if (!ok) return;
+  const cur = SS.view('app') ? cleanHome(SS.view('app')) : null;
+  if (!cur) SS.write('app', home, false);
+  else {
+    let add = 0;
+    for (const id of home.order) if (!cur.items[id]) { cur.items[id] = home.items[id]; cur.order.push(id); add++; }
+    if (add) SS.write('app', cur, false);
+  }
+  for (const e of list) if (!SS.view('e:' + e.id)) SS.write('e:' + e.id, entryData(cleanEntry(e.id, e)), false);
+  toast(empty ? 'Datos subidos a la hoja' : 'Datos añadidos a la hoja', 'check');
+}
+
+function connectSheets(){
+  P.uid = null; P.db = SS;
+  P.homeRef = SS.ref('app', 'hoja/app');
+  P.col = P.homeRef.collection('entries');
+  S.mode = 'remote';
+  subHome();
+  subEntries();
+  if (SS.token()) SS.start();
+  else showLogin({});
+  if (!SS.ready) setBanner(SS.token() ? 'Conectando con tu hoja de Google…' : 'Entra con tu contraseña para ver tus datos.');
+}
+
+/* --- pantalla de entrada --- */
+function showLogin({ expired = false } = {}){
+  if ($('#login')) return;
+  const needUrl = !SERVIDOR_URL;
+  const el = document.createElement('section');
+  el.id = 'login'; el.className = 'login'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Entrar');
+  el.innerHTML = `<form class="lg" autocomplete="on" novalidate>
+      <span class="lgic">${svg('lock')}</span>
+      <h1>Mi espacio</h1>
+      <p class="lgsub">${expired ? 'Tu sesión ha caducado o se cerró. Vuelve a escribir la contraseña: lo que hayas cambiado sigue guardado en este dispositivo.' : 'Escribe tu contraseña para conectar este dispositivo con tu hoja de Google.'}</p>
+      ${needUrl ? `<label class="field"><span>Dirección del servidor (termina en /exec)</span><input class="inp" id="lgUrl" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec"></label>` : ''}
+      <input type="text" name="username" value="Mi espacio" autocomplete="username" hidden>
+      <label class="field"><span>Contraseña</span><input class="inp" id="lgPw" type="password" autocomplete="current-password" enterkeyhint="go" required></label>
+      <button class="pill lgbtn" id="lgGo" type="submit">Entrar</button>
+      <p class="err" id="lgErr" hidden></p>
+      ${SS.ready ? '<button class="tbtn lglater" id="lgLater" type="button">Ahora no</button>' : ''}
+    </form>`;
+  document.body.append(el);
+  const urlI = $('#lgUrl', el), pwI = $('#lgPw', el), go = $('#lgGo', el), err = $('#lgErr', el);
+  if (urlI) urlI.value = ls.get(K_SRV) || '';
+  const later = $('#lgLater', el);
+  if (later) later.addEventListener('click', () => { el.remove(); setBanner('Sin sesión: tus cambios se guardan en este dispositivo y se enviarán cuando entres (Configuración → Entrar).'); });
+  setTimeout(() => (urlI && !urlI.value ? urlI : pwI).focus({ preventScroll: true }), 60);
+  $('form', el).addEventListener('submit', async e => {
+    e.preventDefault();
+    err.hidden = true;
+    if (urlI) {
+      const u = urlI.value.trim();
+      if (!SRV_RE.test(u) || !/\/exec(\?|$)/.test(u)) { err.textContent = 'Pega la dirección completa que acaba en /exec.'; err.hidden = false; return; }
+      ls.set(K_SRV, u);
+    }
+    const pw = pwI.value;
+    if (!pw) { pwI.focus(); return; }
+    go.disabled = true; go.textContent = 'Comprobando…';
+    let r = null;
+    try { r = await SS.request({ op: 'login', password: pw, device: deviceName() }); } catch (x) { r = { ok: false, error: x && x.code || 'red' }; }
+    go.disabled = false; go.textContent = 'Entrar';
+    if (r && r.ok && r.token) {
+      ls.set(K_SES, r.token);
+      SS.authFailed = false;
+      el.remove();
+      setBanner(SS.ready ? null : 'Conectando con tu hoja de Google…');
+      if (!P.homeRef) connectSheets();
+      if (SS.started) SS.sync(); else SS.start();
+      toast('Dispositivo conectado', 'check');
+      return;
+    }
+    pwI.value = '';
+    err.textContent = ({
+      contrasena: `Contraseña incorrecta.${r.quedan ? ` Te quedan ${r.quedan} intentos.` : ''}`,
+      bloqueado: `Demasiados intentos. Espera ${r.min || 15} minutos y vuelve a probar.`,
+      sin_contrasena: 'Todavía no hay contraseña. Ponla en la hoja: menú Mi espacio → 2. Poner o cambiar la contraseña.',
+      red: 'No hay conexión con el servidor. Revisa internet y la dirección.',
+      respuesta: 'Esa dirección no responde como el servidor de Mi espacio. Revisa que sea la de /exec y que el acceso sea «Cualquier usuario».',
+    })[r.error] || 'No se pudo entrar. Prueba otra vez.';
+    err.hidden = false;
+    pwI.focus();
+  });
+}
+
+async function logoutSheets(){
+  const n = SS.out.size;
+  const ok = await confirmDialog({ title: '¿Salir de este dispositivo?', message: n ? `Hay ${plural(n, 'cambio', 'cambios')} sin enviar a la hoja. Si sales ahora se perderán.` : 'Se borrará la copia guardada en este dispositivo. Tus datos siguen en la hoja.', ok: 'Salir' });
+  if (!ok) return;
+  const tok = SS.token();
+  if (tok) { try { await SS.request({ op: 'logout', token: tok }, { timeout: 8000 }); } catch (e) {} }
+  [K_SES, K_HOJA, K_OUT].forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
+  location.reload();
+}
+
 /* ================= render ================= */
 const Drag = { active: false };
 let renderQueued = false;
@@ -840,7 +1222,7 @@ function tileInner(it){
 function tileHTML(it){
   const inner = tileInner(it);
   const tile = it.kind === 'link'
-    ? `<a class="tile" href="${esc(safeUrl(it.url) || '#')}" target="_blank" rel="noopener noreferrer" draggable="false" aria-label="${esc(it.name)}, acceso directo">${inner}</a>`
+    ? `<a class="tile" href="${esc(safeUrl(it.url) || '#')}"${isWeb(it.url) ? ' target="_blank" rel="noopener noreferrer"' : ''} draggable="false" aria-label="${esc(it.name)}, acceso directo">${inner}</a>`
     : `<div class="tile" role="button" tabindex="0" aria-label="${esc(it.name)}, ${esc(kindLabel(it.kind).toLowerCase())}">${inner}</div>`;
   return `<div class="cell" data-id="${esc(it.id)}"><div class="wig">${tile}<button class="badge" type="button" aria-label="Eliminar ${esc(it.name)}">${svg('minus')}</button></div></div>`;
 }
@@ -1127,7 +1509,7 @@ function actionSheet({ title, sub, icon, actions }){
   const rows = actions.map((a, i) => {
     if (a.sep) return '<div class="sep"></div>';
     const body = `${svg(a.icon)}<span class="al">${esc(a.label)}${a.sub ? `<small>${esc(a.sub)}</small>` : ''}</span>`;
-    if (a.href) return `<a class="act" data-i="${i}" href="${esc(a.href)}" target="_blank" rel="noopener noreferrer">${body}</a>`;
+    if (a.href) return `<a class="act" data-i="${i}" href="${esc(a.href)}"${isWeb(a.href) ? ' target="_blank" rel="noopener noreferrer"' : ''}>${body}</a>`;
     return `<button class="act${a.danger ? ' danger' : ''}" data-i="${i}" type="button">${body}</button>`;
   }).join('');
   const sh = makeSheet(`<div class="grab"></div>${title ? `<div class="sh-head">${icon ? `<span class="shic">${svg(icon)}</span>` : ''}<div class="sh-ht"><div class="sh-title">${esc(title)}</div>${sub ? `<div class="sh-sub">${esc(sub)}</div>` : ''}</div></div>` : ''}<div class="acts-list">${rows}<button class="act cancel" type="button" data-close>Cancelar</button></div>`);
@@ -1188,18 +1570,50 @@ function createMenu(){
     { icon: 'list-checks', label: 'Lista', sub: 'Toca el círculo para tachar; luego desaparece', run: () => openItemForm({ kind: 'list' }) },
     { icon: 'wallet', label: 'Finanzas', sub: 'Gastos por mes, presupuesto y gráfica', run: () => openItemForm({ kind: 'money' }) },
     { icon: 'link', label: 'Acceso directo', sub: 'Abre una web o una app', run: () => openItemForm({ kind: 'link' }) },
+    { icon: 'key-round', label: 'Contraseñas', sub: 'Botón que abre tu gestor de contraseñas', run: passwordsMenu },
   ]});
+}
+
+// Una web no puede abrir por sí sola el gestor de contraseñas del móvil: se usa un atajo de iPhone
+// o la web del gestor. Las contraseñas nunca se guardan en Mi espacio.
+const PW_SHORTCUT = 'shortcuts://run-shortcut?name=' + encodeURIComponent('Contraseñas');
+function passwordsMenu(){
+  actionSheet({ title: 'Botón de contraseñas', sub: 'Se añade al inicio con un icono de llave', icon: 'key-round', actions: [
+    { icon: 'smartphone', label: 'App Contraseñas del iPhone', sub: 'Con un atajo llamado «Contraseñas» (te explico cómo crearlo)', run: () => addPasswordsLink('iPhone', PW_SHORTCUT, true) },
+    { icon: 'globe', label: 'Google (passwords.google.com)', sub: 'Las contraseñas guardadas en tu cuenta de Google', run: () => addPasswordsLink('Google', 'https://passwords.google.com') },
+    { icon: 'link', label: 'Otro gestor', sub: 'Pega el enlace de tu gestor (1Password, Bitwarden…)', run: () => openItemForm({ kind: 'link', preset: { name: 'Contraseñas', desc: 'Gestor', icon: 'key-round' } }) },
+  ]});
+}
+function addPasswordsLink(desc, url, help){
+  if (!canWrite()) return;
+  const id = newId();
+  S.home.items[id] = { id, kind: 'link', name: 'Contraseñas', desc, icon: 'key-round', url };
+  S.home.order.push(id);
+  saveHome(); render();
+  setTimeout(() => revealTile(id), 60);
+  if (help) setTimeout(shortcutHelp, 500);
+}
+function shortcutHelp(){
+  makeSheet(`<div class="grab"></div><div class="sh-head"><span class="shic">${svg('key-round')}</span><div class="sh-ht"><div class="sh-title">Crea el atajo una vez</div><div class="sh-sub">Así el botón abre la app Contraseñas</div></div></div>
+    <div class="fbody"><ol class="steps">
+      <li>Abre la app <b>Atajos</b> del iPhone y pulsa <b>+</b>.</li>
+      <li>Busca la acción <b>Abrir app</b> y elige <b>Contraseñas</b>.</li>
+      <li>Arriba, cambia el nombre del atajo a <b>Contraseñas</b> (exactamente así) y pulsa OK.</li>
+      <li>Vuelve aquí y toca la tarjeta de la llave. La primera vez iPhone pregunta si permites abrir Atajos: di que sí.</li>
+    </ol><p class="foot">Si el atajo se llama distinto, mantén pulsada la tarjeta → Editar nombre y cambia el final del enlace.</p>
+    <button class="pill lgbtn" type="button" data-close>Entendido</button></div>`, 'tall');
 }
 
 function iconGrid(sel){
   return ICON_CHOICES.map(n => `<button type="button" class="icopt" data-icon="${n}" aria-label="Icono ${n.replace(/-/g, ' ')}" aria-pressed="${n === sel}">${svg(n)}</button>`).join('');
 }
 
-function openItemForm({ id = null, kind = 'notes' } = {}){
+function openItemForm({ id = null, kind = 'notes', preset = null } = {}){
   if (!canWrite()) return;
   const ex = id ? S.home.items[id] : null;
   if (id && !ex) return;
   const st = { kind: ex ? ex.kind : kind, name: ex ? ex.name : '', desc: ex ? ex.desc : '', url: ex ? ex.url : '', icon: ex ? ex.icon : defaultIcon(kind), touched: !!ex };
+  if (preset) Object.assign(st, preset, { touched: true });
   const isLink = st.kind === 'link';
   const title = ex ? (isLink ? 'Editar acceso' : 'Editar carpeta') : (isLink ? 'Nuevo acceso' : 'Nueva carpeta');
   const sh = makeSheet(`
@@ -2268,6 +2682,7 @@ function openSettings(){
       <p class="gl">Almacenamiento</p>
       <div class="group"><div class="row"><span class="sdot" id="stDot"></span><span id="stText"></span></div><div class="row">Cambios<span class="rv" id="stSave"></span></div></div>
       <p class="foot" id="stFoot"></p>
+      ${standalone ? `<div class="group" id="stSheets">${P.db === SS ? `<button class="row" type="button" id="stSync">${svg('rotate-ccw')}Sincronizar ahora</button><button class="row" type="button" id="stLogin" hidden>${svg('key-round')}Entrar con la contraseña</button><button class="row" type="button" id="stLogout">${svg('lock')}Salir de este dispositivo</button>` : `<button class="row" type="button" id="stConnect">${svg('cloud')}Conectar con Google Sheets</button>`}</div>` : ''}
       <p class="gl">Contenido</p>
       <div class="group"><div class="row">Elementos en el inicio<span class="rv">${c.items}</span></div><div class="row">Notas<span class="rv">${c.notes}</span></div><div class="row">Textos rápidos<span class="rv">${c.snips}</span></div><div class="row">Cosas en listas<span class="rv">${c.todos}</span></div><div class="row">Movimientos de finanzas<span class="rv">${c.moves}</span></div></div>
       <div class="group"><button class="row" type="button" id="stReorder">${svg('move')}Reorganizar inicio</button></div>
@@ -2281,9 +2696,20 @@ function openSettings(){
     const dot = $('#stDot', sh.el), txt = $('#stText', sh.el), sv = $('#stSave', sh.el), foot = $('#stFoot', sh.el);
     if (!dot) return;
     let cls = '', t = '', f = '';
+    if (P.db === SS) {
+      const n = SS.out.size, hora = SS.lastOk ? fmtDate(SS.lastOk) : 'nunca';
+      if (!SS.token() || SS.authFailed) { cls = 'bad'; t = 'Sin sesión'; f = `Entra con tu contraseña para sincronizar.${n ? ` Hay ${plural(n, 'cambio guardado', 'cambios guardados')} aquí que se enviarán al entrar.` : ''}`; }
+      else if (!SS.ready) { t = 'Conectando con la hoja…'; f = 'Descargando tus datos de Google Sheets.'; }
+      else if (SS.lastErr) { cls = ''; t = 'Sin conexión con la hoja'; f = `Puedes seguir usando la app: los cambios se guardan en este dispositivo y se enviarán solos. Última sincronización: ${hora}.`; }
+      else { cls = 'ok'; t = 'Sincronizado con Google Sheets'; f = `Tus datos están en tu hoja de Google y se comparten entre tus dispositivos (cada 20 s y al abrir la app). Última sincronización: ${hora}.`; }
+      dot.className = 'sdot ' + cls; txt.textContent = t; foot.textContent = f;
+      sv.textContent = SS.busy ? 'Sincronizando…' : n ? `${plural(n, 'pendiente', 'pendientes')} de enviar` : 'Todo enviado';
+      const lb = $('#stLogin', sh.el); if (lb) lb.hidden = !!SS.token() && !SS.authFailed;
+      return;
+    }
     if (S.mode === 'remote' && S.ready) { cls = 'ok'; t = 'Sincronizado con tu cuenta'; f = 'Se guarda de forma privada en tu cuenta de Claude: se conserva al cerrar, actualizar o volver a abrir, y aparece en cualquier dispositivo donde abras esta app con tu sesión.'; }
     else if (S.mode === 'remote' || S.mode === 'boot') { t = 'Conectando…'; f = 'Esperando a tu almacenamiento. Mientras tanto puedes ver y copiar.'; }
-    else if (S.mode === 'local') { t = 'Solo en este navegador'; f = 'Para sincronizar, abre la app desde claude.ai con tu sesión iniciada. Lo guardado aquí no pasa a tu cuenta.'; }
+    else if (S.mode === 'local') { t = 'Solo en este navegador'; f = standalone ? 'Para tener los mismos datos en el móvil y el portátil, conecta tu hoja de Google.' : 'Para sincronizar, abre la app desde claude.ai con tu sesión iniciada. Lo guardado aquí no pasa a tu cuenta.'; }
     else { cls = 'bad'; t = 'Sin conexión (solo lectura)'; f = 'Estás viendo la última copia guardada en este dispositivo.'; }
     dot.className = 'sdot ' + cls; txt.textContent = t; foot.textContent = f;
     sv.textContent = isSaving() ? 'Guardando…' : P.failed ? 'Error al guardar' : 'Todo guardado';
@@ -2291,6 +2717,11 @@ function openSettings(){
   paint();
   syncListeners.push(paint);
   sh.onclose = () => { syncListeners = syncListeners.filter(f => f !== paint); };
+  const on = (sel, fn) => { const b = $(sel, sh.el); if (b) b.addEventListener('click', fn); };
+  on('#stSync', () => { SS.authFailed = false; SS.sync(); toast('Sincronizando…', 'rotate-ccw'); });
+  on('#stLogin', () => { sh.close(); setTimeout(() => showLogin({}), 150); });
+  on('#stLogout', () => { sh.close(); setTimeout(logoutSheets, 150); });
+  on('#stConnect', () => { sh.close(); setTimeout(() => showLogin({}), 150); });
   $('#stReorder', sh.el).addEventListener('click', () => { sh.close(); setTimeout(() => startEditing('home'), 150); });
   $('#stExport', sh.el).addEventListener('click', () => {
     const json = JSON.stringify({ ...snapshotAll(), exported: new Date().toISOString() });
@@ -2573,7 +3004,9 @@ function bind(){
 
 /* ================= arranque ================= */
 function boot(){
-  const snap = ls.get(K_CACHE) || ls.get(K_LOCAL);
+  let snap = null;
+  if (sheetsWanted()) { SS.load(); const v = SS.snapshot(); if (v.home) snap = v; }
+  else snap = ls.get(K_CACHE) || ls.get(K_LOCAL);
   if (snap && snap.home) loadSnapshot(snap);
   bind();
   render();
