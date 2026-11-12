@@ -416,6 +416,314 @@ input[type="date"].inp::-webkit-calendar-picker-indicator{filter:invert(1);opaci
 .steps li{margin-bottom:10px}
 .steps b{color:#fff}
 
+/* ---------- colores pastel ---------- */
+.tile.tint,.hic.tint,.shic.tint{background:linear-gradient(150deg,var(--c1) 0%,var(--c2) 62%,rgba(0,0,0,0) 100%),#141414;box-shadow:inset 0 0 0 1px var(--cb)}
+.tile.tint .ic,.hic.tint,.shic.tint{color:var(--c)}
+.tile.tint:active,.tile.tint.pressing{background:linear-gradient(150deg,var(--c1) 0%,var(--c2) 62%,rgba(0,0,0,0) 100%),#202020}
+.ghost .tile.tint{background:linear-gradient(150deg,var(--c1) 0%,var(--c2) 62%,rgba(0,0,0,0) 100%),#202020}
+.tile.tint .meta.cnt{background:var(--c1);color:var(--c)}
+.swatches{display:flex;flex-wrap:wrap;gap:10px}
+.sw-c{position:relative;width:38px;height:38px;border-radius:50%;background:var(--c,#2c2c2e);display:grid;place-items:center;color:#000;transition:transform .15s var(--ease)}
+.sw-c.none{background:#1e1e1e;box-shadow:inset 0 0 0 1.5px #3a3a3c;color:#8e8e93}
+.sw-c.none svg{width:18px;height:18px}
+.sw-c[aria-pressed="true"]{box-shadow:0 0 0 2.5px var(--sheet),0 0 0 4.5px #fff}
+.sw-c:not(.none) svg{width:17px;height:17px;stroke-width:3;opacity:0}
+.sw-c[aria-pressed="true"]:not(.none) svg{opacity:1}
+.sw-c:active{transform:scale(.88)}
+
+/* ---------- carpetas que agrupan ---------- */
+.gmini{display:grid;grid-template-columns:repeat(2,22px);grid-template-rows:repeat(2,22px);gap:5px;width:49px;height:49px;margin:-10px 0 -9px -1px}
+.gm{display:grid;place-items:center;border-radius:7px;background:#2a2a2a;color:#fff}
+.tile .gmini .gm svg{width:13px;height:13px;stroke-width:2.1}
+.gm.e{background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.gm.tint{background:var(--c1s);color:var(--c)}
+.tile.tint .gm:not(.tint):not(.e){background:rgba(255,255,255,.09)}
+.tile.drop-on{transform:scale(1.07);box-shadow:0 0 0 2px rgba(255,255,255,.75);transition:transform .25s var(--ease),box-shadow .2s}
+/* Rendimiento: cerrada, la capa no existe (display:none), así el difuminado no se calcula detrás del inicio.
+   Al abrir: un fotograma para crear la capa y después se animan solo opacity y transform (los baratos).
+   El difuminado no se anima ni lo hereda un padre con opacidad (en Safari eso lo recalcula en cada fotograma). */
+.grp{position:fixed;inset:0;z-index:90;display:none;flex-direction:column;align-items:center;justify-content:center;padding:calc(var(--st) + 20px) 18px calc(var(--sb) + 28px);pointer-events:none}
+.grp.on{display:flex}
+.grp.show{pointer-events:auto}
+.grp-bd{position:absolute;inset:0;background:rgba(0,0,0,.5);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);opacity:0;transition:opacity .28s ease-out;will-change:opacity;transform:translateZ(0)}
+.grp.show .grp-bd{opacity:1}
+.grp-in{position:relative;width:100%;max-width:440px;max-height:100%;display:flex;flex-direction:column;opacity:0;transform:scale(.92);transition:transform .38s var(--ease),opacity .2s ease-out;will-change:transform,opacity}
+.grp.show .grp-in{opacity:1;transform:none}
+.grp-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 6px 16px}
+.grp-name{flex:1;min-width:0;margin:0;font-size:30px;font-weight:700;letter-spacing:-.022em;line-height:1.15;overflow-wrap:anywhere;text-align:left;color:#fff}
+.grp-name.tint{color:var(--c)}
+.grp-panel{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:14px;border-radius:32px;background:rgba(28,28,30,.72);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
+.grp-panel.tint{box-shadow:inset 0 0 0 1px var(--cb)}
+.grp-panel .tile{min-height:112px;background:#1c1c1e}
+.grp .hint{margin-top:14px}
+.grp-empty{grid-column:1/-1;padding:34px 16px;text-align:center;color:var(--muted);font-size:15px;line-height:1.45}
+.pick{display:flex;align-items:center;gap:13px;width:100%;min-height:58px;padding:9px 14px;border-radius:14px;text-align:left;font-size:16.5px;transition:background-color .15s}
+.pick + .pick{margin-top:2px}
+.pick:active{background:#1d1d1d}
+.pick .pic{width:38px;height:38px;border-radius:12px;background:var(--card);display:grid;place-items:center;flex:none}
+.pick .pic svg{width:20px;height:20px;stroke-width:1.9}
+.pick .pic.tint{background:var(--c1s);color:var(--c)}
+.pick .al{flex:1;min-width:0}
+.pick small{display:block;margin-top:1px;color:var(--muted);font-size:13px}
+.pick .ck{width:24px;height:24px;border-radius:50%;border:2px solid #4a4a4e;display:grid;place-items:center;flex:none;color:#000}
+.pick .ck svg{width:14px;height:14px;stroke-width:3.2;opacity:0}
+.pick[aria-pressed="true"] .ck{background:#fff;border-color:#fff}
+.pick[aria-pressed="true"] .ck svg{opacity:1}
+
+/* ---------- widget de calendario ---------- */
+.cell.wide{grid-column:1/-1}
+.tile.calw{flex-direction:row;align-items:stretch;gap:16px;min-height:132px;padding:16px 16px 15px 18px}
+.cw-l{display:flex;flex-direction:column;justify-content:space-between;flex:none;width:76px}
+.cw-wd{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#ff6961}
+.tile.tint .cw-wd{color:var(--c)}
+.cw-d{font-size:46px;line-height:1;font-weight:300;letter-spacing:-.04em;margin-top:2px}
+.cw-m{font-size:14px;color:var(--muted);margin-top:auto}
+.cw-r{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px;padding-left:16px;border-left:1px solid rgba(255,255,255,.08);justify-content:center}
+.cw-ev{display:grid;grid-template-columns:3px minmax(0,1fr);column-gap:10px;align-items:center}
+.cw-ev i{grid-row:span 2;align-self:stretch;width:3px;border-radius:2px;background:var(--ec,#8e8e93)}
+.cw-ev b{font-size:15.5px;font-weight:600;letter-spacing:-.01em;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cw-ev small{font-size:13px;color:var(--muted);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.cw-ev.now b{color:#fff}
+.cw-ev.now small{color:#d1d1d6}
+.cw-more{font-size:13px;color:var(--muted)}
+.cw-none{font-size:15.5px;font-weight:600;letter-spacing:-.01em}
+.cw-sub{font-size:13.5px;color:var(--muted);line-height:1.35}
+.ag-day{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:18px 6px 8px;font-size:14px;font-weight:600;color:#fff}
+.ag-day:first-child{margin-top:4px}
+.ag-day span{color:var(--muted);font-weight:500;font-size:13px}
+.ag-ev{display:grid;grid-template-columns:4px minmax(0,1fr) auto;column-gap:12px;align-items:center;padding:12px 14px;border-radius:16px;background:#1b1b1b}
+.ag-ev + .ag-ev{margin-top:6px}
+.ag-ev i{grid-row:span 2;align-self:stretch;border-radius:2px;background:var(--ec,#8e8e93)}
+.ag-ev b{font-size:16px;font-weight:600;letter-spacing:-.01em;overflow-wrap:anywhere}
+.ag-ev small{grid-column:2;color:var(--muted);font-size:13.5px;margin-top:2px;overflow-wrap:anywhere}
+.ag-ev .h{grid-row:1;grid-column:3;color:#d1d1d6;font-size:14px;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.ag-ev.past{opacity:.45}
+.ag-free{padding:12px 14px;border-radius:16px;background:#151515;color:var(--faint);font-size:14.5px}
+
+/* ---------- universidad ---------- */
+.uni{padding-top:2px}
+.u-sec{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:24px 4px 10px}
+.u-sec:first-child{margin-top:4px}
+.u-sec h3{margin:0;font-size:20px;font-weight:700;letter-spacing:-.015em}
+.u-sec span,.u-sec button{color:var(--muted);font-size:14px}
+.u-sec button{display:flex;align-items:center;gap:4px;height:32px;padding:0 4px;border-radius:10px}
+.u-sec button svg{width:17px;height:17px;stroke-width:2.2}
+.u-sec button:active{opacity:.5}
+.xhero{position:relative;display:block;width:100%;text-align:left;padding:18px 18px 17px;border-radius:var(--r-card);background:var(--card);overflow:hidden}
+.xhero.tint{background:linear-gradient(150deg,var(--c1) 0%,var(--c2) 62%,rgba(0,0,0,0) 100%),#141414;box-shadow:inset 0 0 0 1px var(--cb)}
+.xh-k{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.xhero.tint .xh-k{color:var(--c)}
+.xh-row{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-top:8px}
+.xh-t{min-width:0}
+.xh-t b{display:block;font-size:22px;line-height:1.2;font-weight:700;letter-spacing:-.02em;overflow-wrap:anywhere}
+.xh-t small{display:block;margin-top:5px;color:#c7c7cc;font-size:14.5px;line-height:1.35}
+.xh-n{flex:none;text-align:right}
+.xh-n b{display:block;font-size:44px;line-height:1;font-weight:700;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.xh-n small{display:block;margin-top:3px;color:var(--muted);font-size:13px}
+.xlist{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.xrow{display:grid;grid-template-columns:46px minmax(0,1fr) auto;align-items:center;column-gap:13px;padding:11px 15px 11px 11px;border-radius:18px;background:var(--card);text-align:left;width:100%}
+.xd{display:flex;flex-direction:column;align-items:center;justify-content:center;width:46px;height:46px;border-radius:13px;background:#242424;line-height:1}
+.xd b{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+.xd small{margin-top:3px;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--muted);letter-spacing:.04em}
+.xrow .xt b{display:block;font-size:16px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.xrow .xt small{display:block;margin-top:2px;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.xrow .xc{color:#d1d1d6;font-size:13.5px;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+.xrow:active,.xhero:active{opacity:.75}
+.u-msg{padding:16px 16px;border-radius:18px;background:#151515;color:var(--muted);font-size:14.5px;line-height:1.45}
+.u-msg b{color:#fff}
+.u-msg .pill{margin-top:12px;height:34px;font-size:15px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips .cell{display:flex}
+.ulink{display:flex;align-items:center;gap:8px;height:42px;padding:0 15px 0 12px;border-radius:21px;background:var(--card);font-size:15px;font-weight:500;text-decoration:none;color:#fff;max-width:100%;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;transition:transform .2s var(--ease),background-color .2s}
+.ulink span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ulink svg{width:17px;height:17px;stroke-width:2;flex:none;color:var(--muted)}
+.ulink.add{background:transparent;box-shadow:inset 0 0 0 1.5px #2c2c2e;color:var(--muted)}
+.ulink:active,.ulink.pressing,.prof:active,.prof.pressing{transform:scale(.96);background:var(--card-hi)}
+.profs{display:flex;flex-direction:column;gap:8px}
+.profs .cell{display:flex}
+.prof{flex:1;min-width:0;display:flex;align-items:center;gap:13px;min-height:64px;padding:11px 15px 11px 12px;border-radius:18px;background:var(--card);text-align:left;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;transition:transform .22s var(--ease),background-color .22s}
+.av{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;flex:none;background:#2a2a2a;font-size:15px;font-weight:700;letter-spacing:.02em;color:#fff}
+.av.tint{background:var(--c1s);color:var(--c)}
+.prof .pt{flex:1;min-width:0}
+.prof .pt b{display:block;font-size:16px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prof .pt small{display:block;margin-top:2px;color:var(--muted);font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prof > svg{width:18px;height:18px;color:var(--faint)}
+.u-add{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:0 15px;border-radius:18px;box-shadow:inset 0 0 0 1.5px #232323;color:var(--muted);font-size:15.5px}
+.u-add svg{width:19px;height:19px;stroke-width:2.2}
+.u-add:active{background:#111}
+.info{background:#1b1b1b;border-radius:16px;overflow:hidden;margin-bottom:12px}
+.info .row{align-items:flex-start}
+.info .row small{display:block;color:var(--muted);font-size:13px;margin-bottom:2px}
+.info .row .iv{flex:1;min-width:0;overflow-wrap:anywhere;white-space:pre-line;line-height:1.4}
+.info .row > svg{margin-top:12px;color:var(--muted)}
+.btnrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.btnrow a,.btnrow button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;height:66px;border-radius:16px;background:#1f1f1f;font-size:13.5px;font-weight:500;color:#fff;text-decoration:none}
+.btnrow svg{width:21px;height:21px;stroke-width:1.9}
+.btnrow a:active,.btnrow button:active{background:#2a2a2a}
+.u-notes-h{margin-top:26px}
+
+/* ---------- horario ---------- */
+.sc-wk{display:flex;align-items:center;gap:0}
+.sc-wk button{display:grid;place-items:center;height:32px;min-width:30px;padding:0 4px;border-radius:10px;color:#fff;font-size:14.5px;font-weight:500}
+.sc-wk button svg{width:19px;height:19px;stroke-width:2.2}
+.sc-wk button:disabled{color:#3a3a3c}
+.sc-wk .sc-wl{padding:0 6px;font-variant-numeric:tabular-nums}
+.sc-sub{margin:-6px 4px 10px;color:var(--muted);font-size:13.5px}
+.sched{background:var(--card);border-radius:20px;padding:12px 10px 10px 4px}
+.sc-row{display:grid;grid-template-columns:26px repeat(5,minmax(0,1fr));column-gap:4px}
+.sc-dh{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.03em}
+.sc-dh b{display:grid;place-items:center;width:27px;height:27px;border-radius:50%;font-size:15px;color:#fff;font-weight:600;font-variant-numeric:tabular-nums}
+.sc-dh.today{color:#fff}
+.sc-dh.today b{background:#fff;color:#000}
+.sc-head{margin-bottom:8px}
+.sc-all{margin-bottom:6px}
+.sc-all > span{display:flex;flex-direction:column;gap:3px;min-width:0}
+.sc-all small{font-size:10.5px;color:var(--muted);text-align:center}
+.sc-ad{display:block;width:100%;padding:3px 5px;border-radius:6px;font-size:10.5px;font-weight:600;line-height:1.25;color:#fff;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:inset 2px 0 0 var(--ec)}
+.sc-body{position:relative;border-top:1px solid #262626}
+.sc-gut{position:relative}
+.sc-gut i{position:absolute;right:0;transform:translateY(-50%);font-style:normal;font-size:10.5px;color:var(--faint);font-variant-numeric:tabular-nums}
+.sc-gut i:first-child{transform:none;margin-top:2px}
+.sc-line{position:absolute;left:30px;right:0;height:1px;background:#242424}
+.sc-col{position:relative;min-width:0}
+.sc-col.today{background:rgba(255,255,255,.03);border-radius:0 0 8px 8px}
+.sc-b{position:absolute;display:flex;flex-direction:column;gap:1px;padding:4px 4px 3px 6px;border-radius:7px;overflow:hidden;text-align:left;color:#fff;transition:transform .15s var(--ease)}
+.sc-b:active{transform:scale(.95)}
+.sc-b.cl{background:var(--c1s);box-shadow:inset 3px 0 0 var(--c)}
+.sc-b b{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:11px;font-weight:600;line-height:1.2;letter-spacing:-.01em;overflow-wrap:break-word;-webkit-hyphens:auto;hyphens:auto}
+.sc-b.nar{padding:4px 2px 3px 5px}
+.sc-b.nar b{display:block;white-space:nowrap;text-overflow:ellipsis;font-size:10.5px}
+.sc-b small{font-size:10px;color:rgba(255,255,255,.62);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-b.past{opacity:.62}
+.sc-now{position:absolute;left:-3px;right:0;height:2px;background:#ff453a;border-radius:1px;z-index:2;pointer-events:none}
+.sc-now::before{content:"";position:absolute;left:-3px;top:-3px;width:8px;height:8px;border-radius:50%;background:#ff453a}
+.sc-leg{display:flex;gap:16px;margin:10px 0 0 30px;color:var(--muted);font-size:12px}
+.sc-leg span{display:flex;align-items:center;gap:6px}
+.sc-leg i{width:12px;height:12px;border-radius:4px}
+.sc-leg .k-cl{background:rgba(183,168,247,.3);box-shadow:inset 3px 0 0 #B7A8F7}
+.sc-leg .k-ev{box-shadow:inset 0 0 0 1px #8e8e93}
+.seg.days{grid-template-columns:repeat(5,1fr)}
+.field.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field.two > label > span{display:block;margin:0 4px 7px;color:var(--muted);font-size:13.5px;font-weight:500}
+input[type="time"].inp{display:flex;align-items:center;line-height:50px}
+input[type="time"].inp::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.6}
+
+/* ---------- hábitos ---------- */
+.habit{flex:1;min-width:0;display:flex;flex-direction:column;gap:14px;padding:14px 14px 13px;border-radius:20px;background:linear-gradient(150deg,var(--c1) 0%,var(--c2) 62%,rgba(0,0,0,0) 100%),#141414;box-shadow:inset 0 0 0 1px var(--cb);cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;transition:transform .22s var(--ease)}
+.habit:active,.habit.pressing{transform:scale(.98)}
+.hb-top{display:flex;align-items:center;gap:13px}
+.hb-ck{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:none;box-shadow:inset 0 0 0 2.5px var(--c);color:#000;transition:background-color .25s var(--ease),transform .25s var(--ease)}
+.hb-ck svg{width:21px;height:21px;stroke-width:3.2;opacity:0;transform:scale(.3);transition:opacity .2s,transform .35s var(--ease)}
+.habit.done .hb-ck{background:var(--c)}
+.habit.done .hb-ck svg{opacity:1;transform:none}
+.habit.pop .hb-ck{animation:hbpop .45s var(--ease)}
+@keyframes hbpop{0%{transform:scale(.8)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+.hb-t{flex:1;min-width:0}
+.hb-t b{display:block;font-size:17px;font-weight:600;letter-spacing:-.012em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hb-t small{display:flex;align-items:center;gap:4px;margin-top:2px;color:var(--muted);font-size:13.5px;white-space:nowrap;overflow:hidden}
+.hb-t small svg{width:14px;height:14px;stroke-width:2.2;color:var(--c);flex:none}
+.hb-week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.hb-d{display:flex;flex-direction:column;align-items:center;gap:4px;padding:2px 0;border-radius:10px}
+.hb-d small{font-size:11px;font-weight:600;color:var(--faint)}
+.hb-d.today small{color:#fff}
+.hb-d i{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.06);color:#000}
+.hb-d i svg{width:14px;height:14px;stroke-width:3.2;opacity:0}
+.hb-d.on i{background:var(--c)}
+.hb-d.on i svg{opacity:1}
+.hb-d.today:not(.on) i{box-shadow:inset 0 0 0 1.5px var(--c)}
+.hb-d:disabled{opacity:.35}
+.hb-d:not(:disabled):active i{transform:scale(.85)}
+.ghost .habit{transform:none}
+.list .drag-src:has(.habit)::before{border-radius:20px}
+.stepper{display:flex;align-items:center;justify-content:space-between;height:50px;padding:4px;border-radius:14px;background:var(--field)}
+.stepper button{width:56px;height:42px;border-radius:11px;display:grid;place-items:center;background:#2c2c2e}
+.stepper button svg{width:20px;height:20px;stroke-width:2.4}
+.stepper b{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.hs-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:18px}
+.hs-stats div{padding:12px 6px;border-radius:14px;background:#1b1b1b;text-align:center}
+.hs-stats b{display:block;font-size:22px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--c,#fff)}
+.hs-stats small{display:block;margin-top:3px;color:var(--muted);font-size:11.5px;line-height:1.25}
+.hm-wrap{display:grid;grid-template-columns:minmax(0,1fr) 14px;grid-template-rows:auto auto;column-gap:6px;row-gap:4px}
+.hm-months{display:grid;grid-template-columns:repeat(18,minmax(0,1fr));font-size:10.5px;color:var(--muted);white-space:nowrap}
+.hm-grid{grid-row:2;display:grid;grid-template-columns:repeat(18,minmax(0,1fr));grid-template-rows:repeat(7,auto);gap:3px}
+.hm{aspect-ratio:1;border-radius:4px;background:rgba(255,255,255,.07)}
+.hm.on{background:var(--c)}
+.hm.today{box-shadow:0 0 0 1.5px #fff}
+.hm:disabled{opacity:.25}
+.hm-days{grid-row:2;grid-column:2;display:grid;grid-template-rows:repeat(7,1fr);gap:3px;font-size:9.5px;color:var(--faint);align-items:center}
+
+/* ---------- atajos de Siri ---------- */
+details.siri{background:#1b1b1b;border-radius:16px;margin-bottom:8px;overflow:hidden}
+details.siri summary{display:flex;align-items:center;gap:12px;padding:12px 14px;list-style:none;cursor:pointer;font-size:16px;font-weight:600}
+details.siri summary::-webkit-details-marker{display:none}
+details.siri summary .shic{width:38px;height:38px;border-radius:11px}
+details.siri summary .shic svg{width:20px;height:20px}
+details.siri summary .al{flex:1;min-width:0}
+details.siri summary small{display:block;margin-top:2px;color:var(--muted);font-size:13px;font-weight:400;line-height:1.35}
+details.siri summary > svg{width:18px;height:18px;color:var(--faint);transition:transform .2s}
+details.siri[open] summary > svg{transform:rotate(90deg)}
+details.siri .steps{margin:2px 0 6px;padding:0 16px 4px 34px;font-size:15px;line-height:1.5}
+details.siri .foot{margin:0 16px 14px}
+.kv{display:flex;flex-direction:column;gap:4px;margin:8px 0;padding:10px 12px;border-radius:12px;background:#111}
+.kv span{display:flex;gap:10px;align-items:baseline;font-size:14px}
+.kv code{min-width:74px;color:#fff;font-weight:600}
+.kv i{font-style:normal;color:#c7c7cc}
+details.siri code,.foot code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em}
+
+/* ---------- vista de rayas (Fusión) ---------- */
+.topacts{display:flex;gap:10px;flex:none}
+.ghostbtn{background:transparent;box-shadow:inset 0 0 0 1.5px #2c2c2e}
+.grid.rows{grid-template-columns:minmax(0,1fr);gap:8px}
+.rows .tile{flex-direction:row;align-items:center;gap:15px;min-height:62px;padding:12px 16px;border-radius:20px;background:#111}
+.rows .tile .ic svg{width:23px;height:23px}
+.rows .tile .txt{flex:1;min-width:0}
+.rows .tile .name{font-size:21px;font-weight:500;letter-spacing:-.022em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rows .tile .desc{display:none}
+.rows .tile .meta{position:static;max-width:45%;margin-left:auto;font-size:14px;font-weight:500}
+.rows .tile .meta.cnt{min-width:26px}
+.rows .tile .ext{position:static;color:var(--faint)}
+.rows .tile.tint{background:#111;box-shadow:none}
+.rows .tile.tint:active,.rows .tile.tint.pressing{background:#1b1b1b}
+.rows .tile .gmini{transform:scale(.62);margin:-10px -12px -10px -9px;transform-origin:center}
+.rows .tile.calw{background:#161616;min-height:118px;align-items:stretch;padding:16px 16px 15px 18px;gap:16px}
+.rows .tile.calw.tint{background:linear-gradient(150deg,var(--c1) 0%,var(--c2) 62%,rgba(0,0,0,0) 100%),#141414}
+.grp-panel .grid.rows .tile{background:#1c1c1e}
+.grid.swap{animation:swapin .32s var(--ease)}
+@keyframes swapin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- estilo de color (Configuración; cada dispositivo) ---------- */
+/* Sólido: la tarjeta entera del color pastel, texto oscuro (el widget de calendario va en oscuro) */
+.cs-solido :is(.grid,.ghost) .tile.tint:not(.calw){background:var(--c);box-shadow:none;color:#141414}
+.cs-solido :is(.grid,.ghost) .tile.tint:not(.calw):active,.cs-solido :is(.grid,.ghost) .tile.tint:not(.calw).pressing{background:var(--c);filter:brightness(.86)}
+.cs-solido :is(.grid,.ghost) .tile.tint:not(.calw) :is(.ic,.name){color:#141414}
+.cs-solido :is(.grid,.ghost) .tile.tint:not(.calw) :is(.desc,.meta,.ext){color:rgba(0,0,0,.58)}
+.cs-solido :is(.grid,.ghost) .tile.tint:not(.calw) .meta.cnt{background:rgba(0,0,0,.14);color:#141414}
+.cs-solido :is(.grid,.ghost) .tile.tint:not(.calw) .gm{background:rgba(0,0,0,.13);color:#141414}
+.cs-solido :is(.grid,.ghost) .tile.tint:not(.calw) .gm.e{background:rgba(0,0,0,.06);box-shadow:none}
+/* Oscuro: versión muy oscura del color, sólida */
+.cs-oscuro :is(.grid,.ghost) .tile.tint,.cs-solido :is(.grid,.ghost) .tile.tint.calw{background:var(--cd);box-shadow:none}
+.cs-oscuro :is(.grid,.ghost) .tile.tint:active,.cs-oscuro :is(.grid,.ghost) .tile.tint.pressing,.cs-solido :is(.grid,.ghost) .tile.calw.tint:active,.cs-solido :is(.grid,.ghost) .tile.calw.tint.pressing{background:var(--cdh)}
+/* Resplandor: luz de color que entra por el lado derecho */
+.cs-brillo :is(.grid,.ghost) .tile.tint{background:radial-gradient(circle at 100% 0%,var(--cg),rgba(0,0,0,0) 62%),#121212;box-shadow:none}
+.cs-brillo :is(.grid,.ghost) .tile.tint:active,.cs-brillo :is(.grid,.ghost) .tile.tint.pressing{background:radial-gradient(circle at 100% 0%,var(--cg),rgba(0,0,0,0) 62%),#1e1e1e}
+.cs-brillo .grid.rows .tile.tint{background:radial-gradient(ellipse 60% 140% at 100% 50%,var(--cg),rgba(0,0,0,0) 70%),#101010}
+/* Símbolo: tarjeta gris y el color solo en el icono */
+.cs-icono :is(.grid,.ghost) .tile.tint{background:#161616;box-shadow:none}
+.cs-icono :is(.grid,.ghost) .tile.tint:active,.cs-icono :is(.grid,.ghost) .tile.tint.pressing{background:#202020}
+.cs-icono .grid.rows .tile.tint{background:#111}
+.cs-icono :is(.grid,.ghost) .tile.tint .meta.cnt{background:#2c2c2e;color:#fff}
+/* selector en Configuración */
+.cstyles{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:18px}
+.cstyles button{display:flex;flex-direction:column;align-items:center;gap:7px;padding:10px 2px 9px;border-radius:14px;background:var(--field);color:var(--muted);font-size:12.5px;font-weight:500;transition:background-color .2s,color .2s}
+.cstyles button[aria-pressed="true"]{background:#3a3a3c;color:#fff}
+.csp{--c:#B7A8F7;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:var(--c)}
+.csp svg{width:21px;height:21px;stroke-width:1.9}
+.csp.tinte{background:linear-gradient(150deg,rgba(183,168,247,.2),rgba(183,168,247,.045) 62%,rgba(0,0,0,0)),#141414;box-shadow:inset 0 0 0 1px rgba(183,168,247,.22)}
+.csp.solido{background:var(--c);color:#141414}
+.csp.oscuro{background:rgb(38,35,49)}
+.csp.brillo{background:radial-gradient(circle at 100% 0%,rgba(183,168,247,.5),rgba(0,0,0,0) 70%),#121212}
+.csp.icono{background:#161616}
+
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{transition-duration:.01ms!important;animation:none!important}
 }
@@ -429,13 +737,13 @@ input[type="date"].inp::-webkit-calendar-picker-indicator{filter:invert(1);opaci
         <h1>Mi espacio</h1>
         <p class="sub">Tu pequeño ecosistema</p>
       </div>
-      <button class="round" id="hAdd" type="button" aria-label="Añadir" data-ic="plus"></button>
+      <div class="topacts"><button class="round ghostbtn" id="hView" type="button" aria-label="Cambiar a vista de rayas"></button><button class="round" id="hAdd" type="button" aria-label="Añadir" data-ic="plus"></button></div>
       <button class="pill" id="hDone" type="button" hidden>Listo</button>
     </header>
     <div class="scroll" id="hScroll">
       <div class="banner" id="hBanner" hidden><span class="dot"></span><span id="hBannerText"></span></div>
       <div class="grid" id="hGrid"></div>
-      <p class="hint" id="hHint" hidden>Arrastra para mover · Pulsa Listo al terminar</p>
+      <p class="hint" id="hHint" hidden>Arrastra para mover · Suelta encima de otra tarjeta para agruparlas · Pulsa Listo al terminar</p>
     </div>
     <footer class="bottom">
       <div class="bar">
@@ -467,6 +775,7 @@ input[type="date"].inp::-webkit-calendar-picker-indicator{filter:invert(1);opaci
     <div class="scroll" id="fScroll">
       <div class="addrow" id="fAddRow" hidden><span class="pc" data-ic="plus"></span><input id="fNew" type="text" placeholder="Añadir a la lista" autocomplete="off" enterkeyhint="next" aria-label="Añadir a la lista"><button class="go" id="fNewGo" type="button" aria-label="Añadir" data-ic="check" hidden></button></div>
       <div class="money" id="fMoney" hidden></div>
+      <div class="uni" id="fUni" hidden></div>
       <div class="grid" id="fGrid"></div>
       <p class="hint" id="fHint" hidden></p>
     </div>
@@ -488,6 +797,14 @@ input[type="date"].inp::-webkit-calendar-picker-indicator{filter:invert(1);opaci
     </div>
   </section>
 </main>
+<section class="grp" id="grp" inert aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="grpName">
+  <div class="grp-bd" id="grpBd"></div>
+  <div class="grp-in">
+    <div class="grp-top"><button class="grp-name" id="grpName" type="button"></button><button class="pill" id="grpDone" type="button" hidden>Listo</button></div>
+    <div class="grp-panel" id="grpPanel"><div class="grid" id="gGrid"></div></div>
+    <p class="hint" id="grpHint"></p>
+  </div>
+</section>
 <div id="layer"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -507,6 +824,16 @@ Object.assign(ICONS, {
   'circle-alert': '<circle cx="12" cy="12" r="10" /> <line x1="12" x2="12" y1="8" y2="12" /> <line x1="12" x2="12.01" y1="16" y2="16" />',
   'receipt': '<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" /> <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" /> <path d="M12 17.5v-11" />',
   'euro': '<path d="M4 10h12" /> <path d="M4 14h9" /> <path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2" />',
+  'layers': '<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" /> <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" /> <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />',
+  'calendar-days': '<path d="M8 2v4" /> <path d="M16 2v4" /> <rect width="18" height="18" x="3" y="4" rx="2" /> <path d="M3 10h18" /> <path d="M8 14h.01" /> <path d="M12 14h.01" /> <path d="M16 14h.01" /> <path d="M8 18h.01" /> <path d="M12 18h.01" /> <path d="M16 18h.01" />',
+  'log-out': '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /> <polyline points="16 17 21 12 16 7" /> <line x1="21" x2="9" y1="12" y2="12" />',
+  'folder-input': '<path d="M2 9V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-1" /> <path d="M2 13h10" /> <path d="m9 16 3-3-3-3" />',
+  'refresh-cw': '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /> <path d="M21 3v5h-5" /> <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /> <path d="M8 16H3v5" />',
+  'send': '<path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" /> <path d="m21.854 2.147-10.94 10.939" />',
+  'door-open': '<path d="M13 4h3a2 2 0 0 1 2 2v14" /> <path d="M2 20h3" /> <path d="M13 20h9" /> <path d="M10 12v.01" /> <path d="M13 4.562v16.157a1 1 0 0 1-1.242.97L5 20V5.562a2 2 0 0 1 1.515-1.94l4-1A2 2 0 0 1 13 4.561Z" />',
+  'rows': '<line x1="8" x2="21" y1="6" y2="6" /> <line x1="8" x2="21" y1="12" y2="12" /> <line x1="8" x2="21" y1="18" y2="18" /> <line x1="3" x2="3.01" y1="6" y2="6" /> <line x1="3" x2="3.01" y1="12" y2="12" /> <line x1="3" x2="3.01" y1="18" y2="18" />',
+  'mic': '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" /> <path d="M19 10v2a7 7 0 0 1-14 0v-2" /> <line x1="12" x2="12" y1="19" y2="22" />',
+  'droplet': '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" />',
 });
 const ICON_CHOICES = ['folder','notepad-pen','notebook-pen','sticky-note','file-text','book-open','notebook','graduation-cap','school','wallet','piggy-bank','credit-card','banknote','shirt','copy','clipboard','clipboard-list','plane','map-pin','map','globe','house','briefcase','heart','star','music','camera','image','film','gamepad-2','dumbbell','utensils','coffee','shopping-cart','shopping-bag','gift','calendar','clock','bell','mail','message-circle','phone','user','users','lock','key-round','shield','link','bookmark','tag','lightbulb','brain','code','terminal','cpu','bot','sparkles','flask-conical','calculator','chart-column','receipt','euro','car','bike','train-front','pill','stethoscope','leaf','sun','moon','cloud','flame','zap','trophy','target','palette','pen-tool','scissors','wrench','hammer','package','archive','inbox','list-checks','list-todo','square-check','hash','at-sign','quote','languages','newspaper','headphones','tv','smartphone','laptop','wifi','rocket','mountain','tent','ticket','baby','dog','cat'].filter(n => ICONS[n]);
 
@@ -521,11 +848,34 @@ const clone = o => JSON.parse(JSON.stringify(o));
 const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 const firstLine = s => String(s || '').trim().split('\n')[0].trim().slice(0, 60);
 const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
-const KINDS = ['notes', 'copy', 'list', 'money', 'link'];
+const KINDS = ['notes', 'copy', 'list', 'money', 'link', 'group', 'cal', 'uni', 'habits'];
 const ID_RE = /^[A-Za-z0-9_~:@+-]{1,80}$/;
-const defaultIcon = k => ({ copy: 'copy', link: 'link', list: 'list-checks', money: 'wallet' })[k] || 'folder';
-const kindLabel = k => ({ copy: 'Copiado rápido', link: 'Acceso directo', list: 'Lista', money: 'Finanzas' })[k] || 'Carpeta de notas';
-const countLabel = (k, n) => k === 'notes' ? plural(n, 'nota', 'notas') : k === 'copy' ? plural(n, 'texto', 'textos') : k === 'list' ? plural(n, 'elemento', 'elementos') : plural(n, 'movimiento', 'movimientos');
+const defaultIcon = k => ({ copy: 'copy', link: 'link', list: 'list-checks', money: 'wallet', group: 'layers', cal: 'calendar-days', uni: 'graduation-cap', habits: 'flame' })[k] || 'folder';
+const kindLabel = k => ({ copy: 'Copiado rápido', link: 'Acceso directo', list: 'Lista', money: 'Finanzas', group: 'Carpeta', cal: 'Widget de calendario', uni: 'Universidad', habits: 'Hábitos' })[k] || 'Carpeta de notas';
+const countLabel = (k, n) => k === 'notes' || k === 'uni' ? plural(n, 'nota', 'notas') : k === 'copy' ? plural(n, 'texto', 'textos') : k === 'list' ? plural(n, 'elemento', 'elementos') : k === 'habits' ? plural(n, 'hábito', 'hábitos') : plural(n, 'movimiento', 'movimientos');
+const hasEntries = k => k !== 'link' && k !== 'group' && k !== 'cal';   // tipos que guardan notas, textos, etc.
+const groupable = it => !!it && it.kind !== 'group' && it.kind !== 'cal';
+
+// Colores pastel para las tarjetas (se guarda el nombre, no el tono, para poder retocarlos).
+const COLORS = [
+  { k: 'lavanda', n: 'Lavanda', h: '#B7A8F7' },
+  { k: 'cielo', n: 'Cielo', h: '#9CC5EF' },
+  { k: 'menta', n: 'Menta', h: '#8ED8C2' },
+  { k: 'salvia', n: 'Salvia', h: '#B0CBA3' },
+  { k: 'arena', n: 'Arena', h: '#E7D29F' },
+  { k: 'melocoton', n: 'Melocotón', h: '#F3B79C' },
+  { k: 'rosa', n: 'Rosa', h: '#EFA9C1' },
+  { k: 'lila', n: 'Lila', h: '#D5A9EB' },
+];
+const colorOf = k => COLORS.find(c => c.k === k) || null;
+function tintVars(k){
+  const c = colorOf(k); if (!c) return '';
+  const n = parseInt(c.h.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+  const dk = (f, base) => `rgb(${Math.round(r * f + base * (1 - f))},${Math.round(g * f + base * (1 - f))},${Math.round(b * f + base * (1 - f))})`;
+  return `--c:${c.h};--c1:rgba(${r},${g},${b},.2);--c2:rgba(${r},${g},${b},.045);--cb:rgba(${r},${g},${b},.22);--c1s:rgba(${r},${g},${b},.22);--cd:${dk(.17, 8)};--cdh:${dk(.24, 18)};--cg:rgba(${r},${g},${b},.42)`;
+}
+// atributos para un elemento con color: class="… tint" style="…"
+const tintAttr = (k, cls = '') => { const v = tintVars(k); return v ? ` class="${cls} tint" style="${v}"` : ` class="${cls}"`; };
 const kindsCompatible = (a, b) => a === b || (['notes', 'copy'].includes(a) && ['notes', 'copy'].includes(b));
 
 function safeUrl(u){
@@ -559,18 +909,19 @@ const K_CACHE = 'miespacio.cache.v1';   // copia de lo sincronizado, solo para a
 const K_LOCAL = 'miespacio.local.v1';   // almacén principal en modo local
 
 /* ================= modelo ================= */
-const MIG = 1;   // versión de los datos del inicio (1 = listas y finanzas)
+const MIG = 2;   // versión de los datos del inicio (1 = listas y finanzas · 2 = calendario, universidad y carpetas)
 function defaultHome(){
   const items = [
+    { id: 'calendario', kind: 'cal', name: 'Hoy', desc: '', icon: 'calendar-days' },
     { id: 'notas', kind: 'notes', name: 'Notas', desc: 'Personales', icon: 'notepad-pen' },
-    { id: 'universidad', kind: 'notes', name: 'Universidad', desc: 'Estudios', icon: 'graduation-cap' },
+    { id: 'universidad', kind: 'uni', name: 'Universidad', desc: 'Exámenes', icon: 'graduation-cap', color: 'lavanda' },
     { id: 'finanzas', kind: 'money', name: 'Finanzas', desc: 'Gastos', icon: 'wallet' },
     { id: 'recordatorios', kind: 'list', name: 'Recordatorios', desc: 'Tareas', icon: 'list-checks' },
     { id: 'armarios', kind: 'notes', name: 'Armarios', desc: 'Ropa', icon: 'shirt' },
     { id: 'textos', kind: 'copy', name: 'Textos rápidos', desc: 'Copiar', icon: 'copy' },
     { id: 'viajes', kind: 'notes', name: 'Viajes', desc: 'Lugares', icon: 'plane' },
   ];
-  return { v: 1, mig: MIG, order: items.map(i => i.id), items: Object.fromEntries(items.map(i => [i.id, { ...i, url: '' }])) };
+  return cleanHome({ v: 1, mig: MIG, order: items.map(i => i.id), items: Object.fromEntries(items.map(i => [i.id, { ...i, url: '' }])) });
 }
 const str = (v, max) => typeof v === 'string' ? v.slice(0, max) : '';
 const int = (v, max) => Number.isFinite(v) ? Math.max(0, Math.min(max, Math.round(v))) : 0;
@@ -579,18 +930,33 @@ function cleanItem(id, it){
   if (!it || typeof it !== 'object') return null;
   const kind = KINDS.includes(it.kind) ? it.kind : 'notes';
   const o = { id, kind, name: str(it.name, 80) || 'Sin nombre', desc: str(it.desc, 80), icon: ICONS[it.icon] ? it.icon : defaultIcon(kind), url: kind === 'link' ? str(it.url, 2000) : '' };
+  if (colorOf(it.color)) o.color = it.color;
   if (kind === 'money') o.budget = int(it.budget, 1e11);
+  if (kind === 'group') o.children = Array.isArray(it.children) ? it.children.filter(x => typeof x === 'string').slice(0, 200) : [];
+  if (kind === 'uni') o.calName = str(it.calName, 100) || 'Universidad';
   return o;
 }
+// Un elemento está o en el inicio (order) o dentro de una carpeta (children), nunca en los dos.
+// Las carpetas no van dentro de carpetas, y el widget de calendario tampoco.
 function cleanHome(d){
   const items = {};
   const src = d && d.items && typeof d.items === 'object' ? d.items : {};
-  for (const [id, it] of Object.entries(src)) { const c = cleanItem(id, it); if (c) items[id] = c; }
+  for (const [id, it] of Object.entries(src)) { if (!ID_RE.test(id)) continue; const c = cleanItem(id, it); if (c) items[id] = c; }
+  const claimed = new Set();
+  const rawOrder = (d && Array.isArray(d.order) ? d.order : []).filter(id => typeof id === 'string' && items[id]);
+  const groupIds = [...new Set([...rawOrder, ...Object.keys(items)])].filter(id => items[id].kind === 'group');
+  for (const gid of groupIds) {
+    const g = items[gid];
+    g.children = g.children.filter(c => c !== gid && groupable(items[c]) && !claimed.has(c));
+    g.children.forEach(c => claimed.add(c));
+  }
   const order = [], seen = new Set();
-  for (const id of (d && Array.isArray(d.order) ? d.order : [])) if (typeof id === 'string' && items[id] && !seen.has(id)) { order.push(id); seen.add(id); }
-  for (const id of Object.keys(items)) if (!seen.has(id)) order.push(id);
+  for (const id of rawOrder) if (!seen.has(id) && !claimed.has(id)) { order.push(id); seen.add(id); }
+  for (const id of Object.keys(items)) if (!seen.has(id) && !claimed.has(id)) order.push(id);
   return { v: 1, mig: d && Number.isFinite(d.mig) ? d.mig : 0, order, items };
 }
+const groupOf = id => { for (const it of Object.values(S.home.items)) if (it.kind === 'group' && it.children.includes(id)) return it; return null; };
+const ENTRY_T = ['', 'prof', 'link', 'class'];
 function cleanEntry(id, e){
   e = e || {};
   const now = Date.now();
@@ -598,9 +964,15 @@ function cleanEntry(id, e){
     id, folder: str(e.folder, 120), title: str(e.title, 300), body: str(e.body, 300000), pos: Number.isFinite(e.pos) ? e.pos : 0, created: Number.isFinite(e.created) ? e.created : now, updated: Number.isFinite(e.updated) ? e.updated : now,
     // listas: done = cuándo se tachó · finanzas: importe en céntimos, categoría, día, ingreso, fijo mensual
     done: int(e.done, 1e14), amt: int(e.amt, 1e11), cat: str(e.cat, 30), day: YMD_RE.test(e.day) ? e.day : '', inc: e.inc ? 1 : 0, rep: e.rep ? 1 : 0, src: str(e.src, 120), upto: YM_RE.test(e.upto) ? e.upto : '',
+    // universidad: t = '' (nota) | 'prof' (profesor) | 'link' (enlace)
+    t: ENTRY_T.includes(e.t) ? e.t : '', subj: str(e.subj, 120), mail: str(e.mail, 200), ph: str(e.ph, 40), room: str(e.room, 120), hours: str(e.hours, 600), url: str(e.url, 2000),
+    // horario: día de la semana (1 = lunes … 5 = viernes), hora de inicio y fin 'HH:MM', color
+    dow: int(e.dow, 7), hs: /^\d{2}:\d{2}$/.test(e.hs) ? e.hs : '', he: /^\d{2}:\d{2}$/.test(e.he) ? e.he : '', col: colorOf(e.col) ? e.col : '',
+    // hábitos: veces por semana (7 = cada día) y días hechos 'AAAAMMDD,AAAAMMDD,…'
+    goal: int(e.goal, 7), hd: typeof e.hd === 'string' && /^\d{8}(,\d{8})*$/.test(e.hd) ? e.hd.split(',').slice(-4000).join(',') : '',   // como mucho ~11 años de días
   };
 }
-const EXTRA = ['done', 'amt', 'cat', 'day', 'inc', 'rep', 'src', 'upto'];
+const EXTRA = ['done', 'amt', 'cat', 'day', 'inc', 'rep', 'src', 'upto', 't', 'subj', 'mail', 'ph', 'room', 'hours', 'url', 'dow', 'hs', 'he', 'col', 'goal', 'hd'];
 const entryData = e => { const d = { folder: e.folder, title: e.title, body: e.body, pos: e.pos, created: e.created, updated: e.updated }; for (const k of EXTRA) if (e[k]) d[k] = e[k]; return d; };
 
 const S = {
@@ -849,7 +1221,7 @@ function syncChanged(){ syncListeners.forEach(f => f()); }
 // que solo conoce el script; aquí se guarda únicamente un token de sesión de este dispositivo.
 // SS imita la interfaz de la base de datos de claude.ai (doc, collection, set, delete, onSnapshot)
 // para reutilizar toda la lógica de la app.
-const SERVIDOR_URL = 'https://script.google.com/macros/s/AKfycbw2PhJSrWks__ICFd_5jqjDDayJuBMfUkUoGJY0UrJX1nQ4KTwKmx-qwIZrSwfVHoibSA/exec';                      // dirección /exec del Apps Script (no es secreta)
+const SERVIDOR_URL = 'https://script.google.com/macros/s/AKfycbx4FG3wXolI6MPQUWsIjQaDxW6iuIducFLxbntAlhvgtlv_i-TDPGXb5uUKGFAA5mPgwA/exec';                      // dirección /exec del Apps Script (no es secreta)
 const K_SRV = 'miespacio.servidor.v1';        // dirección pegada en este navegador, si no está arriba
 const K_SES = 'miespacio.sesion.v1';          // token de sesión de este dispositivo
 const K_HOJA = 'miespacio.hoja.v1';           // última copia de la hoja, para abrir rápido y sin conexión
@@ -1012,6 +1384,7 @@ const SS = {
     this.saveCache();
     if (!r.same || !wasReady) this.emit();
     if (!wasReady || r.full) setTimeout(offerLocalData, 300);
+    if (!wasReady) setTimeout(() => Cal.maybe(), 200);
   },
   async push(){
     for (let round = 0; round < 50; round++) {
@@ -1066,9 +1439,9 @@ const SS = {
     if (this.started) return;
     this.started = true;
     this.sync();
-    this.pollT = setInterval(() => { if (document.visibilityState === 'visible') this.sync(); }, POLL_MS);
+    this.pollT = setInterval(() => { if (document.visibilityState === 'visible') { this.sync(); Cal.maybe(); } }, POLL_MS);
     window.addEventListener('online', () => this.sync());
-    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') this.sync(); else this.flushKeepalive(); });
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { this.sync(); Cal.maybe(); } else this.flushKeepalive(); });
   },
   onAuthLost(){
     this.authFailed = true;
@@ -1086,15 +1459,21 @@ function resolveConflict(k, sent, x){
     // Se queda el inicio del otro dispositivo y se añaden las carpetas nuevas de este.
     let added = 0;
     const mine = cleanHome(sent.j);
-    for (const id of mine.order) if (!srv.items[id]) { srv.items[id] = mine.items[id]; srv.order.push(id); added++; }
-    if (added) SS.write('app', srv, false);
+    for (const id of Object.keys(mine.items)) if (!srv.items[id]) { srv.items[id] = mine.items[id]; srv.order.push(id); added++; }
+    if (added) SS.write('app', cleanHome(srv), false);
     return;
   }
   if (sent.del) return;                       // lo borraste aquí pero se cambió allí: se conserva
   if (x.d) { SS.write(k, sent.j, false); return; }   // lo borraron allí pero lo cambiaste aquí: se recupera
   const it = S.home.items[sent.j.folder];
   const a = x.j || {}, b = sent.j;
-  if (it && (it.kind === 'notes' || it.kind === 'copy') && (a.title !== b.title || a.body !== b.body)) {
+  if (it && it.kind === 'habits') {
+    // dos dispositivos marcaron días a la vez: se juntan los días de los dos
+    const days = [...new Set([...(a.hd ? a.hd.split(',') : []), ...(b.hd ? b.hd.split(',') : [])])].sort().join(',');
+    if (days !== (a.hd || '')) SS.write(k, { ...a, hd: days, updated: Date.now() }, false);
+    return;
+  }
+  if (it && (it.kind === 'notes' || it.kind === 'copy' || it.kind === 'uni') && (a.title !== b.title || a.body !== b.body)) {
     const nid = newId();
     SS.write('e:' + nid, { ...b, title: ((b.title || firstLine(b.body) || 'Nota') + ' (conflicto)').slice(0, 300), pos: (b.pos || 0) + 1, updated: Date.now() }, false);
     toast('Una nota se cambió en dos sitios: se guardaron las dos versiones', 'info');
@@ -1117,8 +1496,8 @@ async function offerLocalData(){
   if (!cur) SS.write('app', home, false);
   else {
     let add = 0;
-    for (const id of home.order) if (!cur.items[id]) { cur.items[id] = home.items[id]; cur.order.push(id); add++; }
-    if (add) SS.write('app', cur, false);
+    for (const id of Object.keys(home.items)) if (!cur.items[id]) { cur.items[id] = home.items[id]; cur.order.push(id); add++; }
+    if (add) SS.write('app', cleanHome(cur), false);
   }
   for (const e of list) if (!SS.view('e:' + e.id)) SS.write('e:' + e.id, entryData(cleanEntry(e.id, e)), false);
   toast(empty ? 'Datos subidos a la hoja' : 'Datos añadidos a la hoja', 'check');
@@ -1180,6 +1559,7 @@ function showLogin({ expired = false } = {}){
       setBanner(SS.ready ? null : 'Conectando con tu hoja de Google…');
       if (!P.homeRef) connectSheets();
       if (SS.started) SS.sync(); else SS.start();
+      setTimeout(() => Cal.refresh(true), 400);
       toast('Dispositivo conectado', 'check');
       return;
     }
@@ -1202,9 +1582,35 @@ async function logoutSheets(){
   if (!ok) return;
   const tok = SS.token();
   if (tok) { try { await SS.request({ op: 'logout', token: tok }, { timeout: 8000 }); } catch (e) {} }
-  [K_SES, K_HOJA, K_OUT].forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
+  [K_SES, K_HOJA, K_OUT, K_CAL, K_ATAJO].forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
   location.reload();
 }
+
+/* ================= vista del inicio: cuadrados (Grafito) o rayas (Fusión) ================= */
+// Se guarda en cada dispositivo (en el portátil puedes tener una y en el móvil otra).
+const K_VISTA = 'miespacio.vista.v1';
+const View = {
+  get(){ return ls.get(K_VISTA) === 'rows' ? 'rows' : 'grid'; },
+  set(v){
+    ls.set(K_VISTA, v === 'rows' ? 'rows' : 'grid');
+    lastHome = ''; lastGroup = '';
+    render();
+    [$('#hGrid'), $('#gGrid')].forEach(g => { g.classList.remove('swap'); void g.offsetWidth; g.classList.add('swap'); });
+    toast(v === 'rows' ? 'Vista de rayas' : 'Vista de cuadrados', v === 'rows' ? 'rows' : 'layout-grid');
+  },
+  toggle(){ this.set(this.get() === 'rows' ? 'grid' : 'rows'); },
+};
+
+/* ================= estilo de color de las tarjetas ================= */
+// También se guarda en cada dispositivo. 'tinte' es el de siempre.
+const K_CESTILO = 'miespacio.estilocolor.v1';
+const CSTYLES = [['tinte', 'Tinte'], ['solido', 'Sólido'], ['oscuro', 'Oscuro'], ['brillo', 'Resplandor'], ['icono', 'Símbolo']];
+const CStyle = {
+  get(){ const v = ls.get(K_CESTILO); return CSTYLES.some(x => x[0] === v) ? v : 'tinte'; },
+  apply(){ const v = this.get(), el = document.documentElement; CSTYLES.forEach(([k]) => el.classList.toggle('cs-' + k, k === v && k !== 'tinte')); },
+  set(v){ ls.set(K_CESTILO, v); this.apply(); },
+};
+CStyle.apply();
 
 /* ================= render ================= */
 const Drag = { active: false };
@@ -1216,15 +1622,25 @@ function render(){
   if (S.folder) renderFolder();
 }
 
+function groupMini(it){
+  const kids = (it.children || []).map(id => S.home.items[id]).filter(Boolean).slice(0, 4);
+  let h = kids.map(k => `<span${tintAttr(k.color, 'gm')}>${svg(k.icon)}</span>`).join('');
+  for (let i = kids.length; i < 4; i++) h += '<span class="gm e"></span>';
+  return `<span class="ic gmini" aria-hidden="true">${h}</span>`;
+}
 function tileInner(it){
-  return `<span class="ic">${svg(it.icon)}</span><span class="txt"><span class="name">${esc(it.name)}</span>${it.desc ? `<span class="desc">${esc(it.desc)}</span>` : ''}</span>${it.kind === 'link' ? `<span class="ext">${svg('arrow-up-right')}</span>` : ''}${tileMeta(it)}`;
+  if (it.kind === 'cal') return calWidgetInner(it);
+  const n = it.kind === 'group' ? (it.children || []).filter(id => S.home.items[id]).length : 0;
+  const desc = it.kind === 'group' ? (it.desc || (n ? plural(n, 'elemento', 'elementos') : 'Vacía')) : it.desc;
+  return `${it.kind === 'group' ? groupMini(it) : `<span class="ic">${svg(it.icon)}</span>`}<span class="txt"><span class="name">${esc(it.name)}</span>${desc ? `<span class="desc">${esc(desc)}</span>` : ''}</span>${it.kind === 'link' ? `<span class="ext">${svg('arrow-up-right')}</span>` : ''}${tileMeta(it)}`;
 }
 function tileHTML(it){
   const inner = tileInner(it);
+  const tv = tintVars(it.color), cls = 'tile' + (it.kind === 'cal' ? ' calw' : '') + (tv ? ' tint' : ''), sty = tv ? ` style="${tv}"` : '';
   const tile = it.kind === 'link'
-    ? `<a class="tile" href="${esc(safeUrl(it.url) || '#')}"${isWeb(it.url) ? ' target="_blank" rel="noopener noreferrer"' : ''} draggable="false" aria-label="${esc(it.name)}, acceso directo">${inner}</a>`
-    : `<div class="tile" role="button" tabindex="0" aria-label="${esc(it.name)}, ${esc(kindLabel(it.kind).toLowerCase())}">${inner}</div>`;
-  return `<div class="cell" data-id="${esc(it.id)}"><div class="wig">${tile}<button class="badge" type="button" aria-label="Eliminar ${esc(it.name)}">${svg('minus')}</button></div></div>`;
+    ? `<a class="${cls}"${sty} href="${esc(safeUrl(it.url) || '#')}"${isWeb(it.url) ? ' target="_blank" rel="noopener noreferrer"' : ''} draggable="false" aria-label="${esc(it.name)}, acceso directo">${inner}</a>`
+    : `<div class="${cls}"${sty} role="button" tabindex="0" aria-label="${esc(it.kind === 'cal' ? 'Agenda de hoy' : it.name)}, ${esc(kindLabel(it.kind).toLowerCase())}">${inner}</div>`;
+  return `<div class="cell${it.kind === 'cal' ? ' wide' : ''}" data-id="${esc(it.id)}"><div class="wig">${tile}<button class="badge" type="button" aria-label="${it.kind === 'group' ? 'Deshacer' : 'Eliminar'} ${esc(it.name)}">${svg('minus')}</button></div></div>`;
 }
 let lastHome = '';
 function renderHome(){
@@ -1233,10 +1649,14 @@ function renderHome(){
     : `<div class="empty">${svg('layout-grid')}<b>Tu espacio está vacío</b><span>Pulsa + para crear una carpeta o un acceso directo.</span></div>`;
   if (html !== lastHome) { $('#hGrid').innerHTML = html; lastHome = html; }
   const ed = S.editing === 'home';
+  const rows = View.get() === 'rows';
+  $('#hGrid').classList.toggle('rows', rows); $('#gGrid').classList.toggle('rows', rows);
+  const vb = $('#hView'); vb.innerHTML = svg(rows ? 'layout-grid' : 'rows'); vb.setAttribute('aria-label', rows ? 'Cambiar a vista de cuadrados' : 'Cambiar a vista de rayas');
   $('#sHome').classList.toggle('editing', ed);
-  $('#hAdd').hidden = ed;
+  $('#hAdd').hidden = ed; vb.hidden = ed;
   $('#hDone').hidden = !ed;
   $('#hHint').hidden = !ed;
+  renderGroup();
 }
 
 function noteHTML(e){
@@ -1256,7 +1676,15 @@ function gridHTML(it){
   const list = folderEntries(it.id);
   const ed = S.editing === it.id;
   let html = '', hint = '';
-  if (it.kind === 'notes') {
+  if (it.kind === 'habits') {
+    const arr = list.sort(snipSort);
+    if (arr.length) { html = arr.map(habitHTML).join(''); hint = ed ? 'Arrastra para mover · Pulsa Listo al terminar' : 'Toca el círculo para marcar hoy · Toca el hábito para ver su calendario'; }
+    else html = emptyHTML('flame', 'Aún no hay hábitos', 'Añade lo que quieras hacer a menudo: gimnasio, leer, estudiar IA… y márcalo cada día.', 'Nuevo hábito', 'newHabit');
+  } else if (it.kind === 'uni') {
+    const arr = list.filter(e => !e.t).sort((a, b) => b.updated - a.updated);
+    html = arr.map(noteHTML).join('');
+    hint = 'Mantén pulsado algo para editarlo, copiarlo o eliminarlo';
+  } else if (it.kind === 'notes') {
     let arr = list.sort((a, b) => b.updated - a.updated);
     const q = norm(S.query.trim());
     if (q) arr = arr.filter(e => norm(e.title).includes(q) || norm(e.body).includes(q));
@@ -1276,14 +1704,17 @@ function gridHTML(it){
 }
 function renderFolder(){
   const it = S.home.items[S.folder];
-  if (!it || it.kind === 'link') { if (Editor.id) closeNote(true); closeFolder(); return; }
+  if (!it || !hasEntries(it.kind)) { if (Editor.id) closeNote(true); closeFolder(); return; }
   const list = folderEntries(it.id);
-  const isList = it.kind === 'list', isMoney = it.kind === 'money';
+  const isList = it.kind === 'list', isMoney = it.kind === 'money', isUni = it.kind === 'uni', isHab = it.kind === 'habits';
   let count;
   if (isList) { const p = list.filter(e => !e.done).length; count = p ? plural(p, 'pendiente', 'pendientes') : list.length ? 'Todo hecho' : 'Nada pendiente'; }
   else if (isMoney) count = countLabel('money', list.filter(e => !e.rep).length);
+  else if (isHab) { const h = habitsDoneToday(it.id); count = h.n ? (h.done === h.n ? 'Todo hecho hoy' : `${h.done} de ${h.n} hoy`) : 'Sin hábitos'; }
+  else if (isUni) { const nx = uniNext(it); count = nx ? `Lo siguiente: ${relLabel(evDay0(nx)).toLowerCase()}` : countLabel('uni', list.filter(e => !e.t).length); }
   else count = countLabel(it.kind, list.length);
-  $('#fIcon').innerHTML = svg(it.icon);
+  const hic = $('#fIcon'), tv = tintVars(it.color);
+  hic.innerHTML = svg(it.icon); hic.className = 'hic' + (tv ? ' tint' : ''); hic.style.cssText = tv;
   $('#fName').textContent = it.name;
   $('#fSub').textContent = [it.desc, count].filter(Boolean).join(' · ');
   $('#fSearchWrap').hidden = it.kind !== 'notes';
@@ -1291,12 +1722,13 @@ function renderFolder(){
   $('#fMoney').hidden = !isMoney;
   const grid = $('#fGrid');
   grid.hidden = isMoney;
-  grid.classList.toggle('list', isList);
+  grid.classList.toggle('list', isList || isHab);
   const ed = S.editing === it.id;
   $('#sFolder').classList.toggle('editing', ed);
   $('#fAdd').hidden = ed;
   $('#fDone').hidden = !ed;
-  $('#fMore').hidden = ed || !(isList || isMoney);
+  $('#fMore').hidden = ed || !(isList || isMoney || isUni);
+  $('#fUni').hidden = !isUni;
   $('#fAdd').setAttribute('aria-label', ({ notes: 'Nueva nota', copy: 'Nuevo texto', list: 'Añadir a la lista', money: 'Nuevo gasto' })[it.kind] || 'Añadir');
   const g = gridHTML(it);
   if (g.html !== lastFolder) { grid.innerHTML = g.html; lastFolder = g.html; }
@@ -1304,6 +1736,8 @@ function renderFolder(){
   $('#fHint').hidden = !g.hint;
   if (isMoney) renderMoney(it);
   else if (lastMoney) { $('#fMoney').innerHTML = ''; lastMoney = ''; Chart.days = null; }
+  if (isUni) renderUni(it);
+  else if (lastUni) { $('#fUni').innerHTML = ''; lastUni = ''; }
 }
 
 /* ================= navegación ================= */
@@ -1314,7 +1748,9 @@ function setScreen(el, state){
 }
 function openFolder(id){
   const it = S.home.items[id];
-  if (!it || it.kind === 'link') return;
+  if (!it || !hasEntries(it.kind)) return;
+  if (G.id) { const back = groupOf(id) ? G.id : null; closeGroup(); G.back = back; }
+  if (it.kind === 'uni') { Cal.maybe(); Sched.off = 0; }
   S.folder = id; S.query = ''; $('#fQuery').value = ''; $('#fClear').hidden = true;
   if (S.editing) S.editing = null;
   S.moneyMonth = curYM();
@@ -1332,6 +1768,8 @@ function closeFolder(){
   setScreen($('#sFolder'), 'off');
   setScreen($('#sHome'), 'on');
   renderHome();
+  const back = G.back; G.back = null;
+  if (back && S.home.items[back]) setTimeout(() => openGroup(back), 180);
 }
 function startEditing(scope){
   if (!canWrite()) return;
@@ -1565,6 +2003,11 @@ function toast(msg, icon, action){
 /* ================= elementos del inicio ================= */
 function createMenu(){
   actionSheet({ title: 'Añadir', actions: [
+    { icon: 'layers', label: 'Carpeta', sub: 'Agrupa varias tarjetas del inicio en una', run: () => openGroupForm() },
+    { icon: 'calendar-days', label: 'Widget de calendario', sub: 'Lo que tienes hoy en Google Calendar', run: addCalWidget },
+    { icon: 'graduation-cap', label: 'Universidad', sub: 'Próximos exámenes, profesores, enlaces y notas', run: () => openItemForm({ kind: 'uni' }) },
+    { icon: 'flame', label: 'Hábitos', sub: 'Márcalos cada día y mantén la racha', run: () => openItemForm({ kind: 'habits' }) },
+    { sep: true },
     { icon: 'notepad-pen', label: 'Carpeta de notas', sub: 'Notas con título y contenido, con buscador', run: () => openItemForm({ kind: 'notes' }) },
     { icon: 'copy', label: 'Carpeta de copiado rápido', sub: 'Un toque copia el texto al portapapeles', run: () => openItemForm({ kind: 'copy' }) },
     { icon: 'list-checks', label: 'Lista', sub: 'Toca el círculo para tachar; luego desaparece', run: () => openItemForm({ kind: 'list' }) },
@@ -1612,68 +2055,84 @@ function openItemForm({ id = null, kind = 'notes', preset = null } = {}){
   if (!canWrite()) return;
   const ex = id ? S.home.items[id] : null;
   if (id && !ex) return;
-  const st = { kind: ex ? ex.kind : kind, name: ex ? ex.name : '', desc: ex ? ex.desc : '', url: ex ? ex.url : '', icon: ex ? ex.icon : defaultIcon(kind), touched: !!ex };
+  if ((ex ? ex.kind : kind) === 'group') { openGroupForm({ id }); return; }
+  const preName = { uni: 'Universidad', habits: 'Hábitos' }[kind] || '', preDesc = { uni: 'Exámenes', habits: 'Rutinas' }[kind] || '', preCol = { uni: 'lavanda', habits: 'melocoton' }[kind] || '';
+  const st = { kind: ex ? ex.kind : kind, name: ex ? ex.name : preName, desc: ex ? ex.desc : preDesc, url: ex ? ex.url : '', icon: ex ? ex.icon : defaultIcon(kind), color: ex ? ex.color || '' : preCol, touched: !!ex };
   if (preset) Object.assign(st, preset, { touched: true });
-  const isLink = st.kind === 'link';
-  const title = ex ? (isLink ? 'Editar acceso' : 'Editar carpeta') : (isLink ? 'Nuevo acceso' : 'Nueva carpeta');
+  const isLink = st.kind === 'link', isCal = st.kind === 'cal', fixed = isLink || isCal || st.kind === 'uni' || st.kind === 'habits';
+  const title = isCal ? 'Widget de calendario' : st.kind === 'uni' ? (ex ? 'Editar Universidad' : 'Nueva Universidad') : st.kind === 'habits' ? (ex ? 'Editar hábitos' : 'Nuevos hábitos') : ex ? (isLink ? 'Editar acceso' : 'Editar carpeta') : (isLink ? 'Nuevo acceso' : 'Nueva carpeta');
   const sh = makeSheet(`
     <div class="fhead"><button class="tbtn l" type="button" data-close>Cancelar</button><div class="ft">${title}</div><button class="tbtn strong r" id="fmSave" type="button">${ex ? 'Guardar' : 'Crear'}</button></div>
     <div class="fbody">
-      <div class="preview"><div class="cell"><div class="wig"><div class="tile" id="fmPrev"></div></div></div></div>
-      <label class="field"><span>Nombre</span><input class="inp" id="fmName" maxlength="40" autocomplete="off" enterkeyhint="next" data-next="fmDesc" placeholder="${isLink ? 'Ej. Campus virtual' : 'Ej. Universidad'}"></label>
-      <label class="field"><span>Descripción (opcional)</span><input class="inp" id="fmDesc" maxlength="40" autocomplete="off" enterkeyhint="${isLink ? 'next' : 'done'}" ${isLink ? 'data-next="fmUrl"' : ''} placeholder="${isLink ? 'Ej. Apuntes y notas' : 'Ej. Estudios'}"></label>
+      <div class="preview"${isCal ? ' style="display:block"' : ''}><div class="cell"${isCal ? ' style="width:100%;max-width:none"' : ''}><div class="wig"><div class="tile" id="fmPrev"></div></div></div></div>
+      ${isCal ? '' : `<label class="field"><span>Nombre</span><input class="inp" id="fmName" maxlength="40" autocomplete="off" enterkeyhint="next" data-next="fmDesc" placeholder="${isLink ? 'Ej. Campus virtual' : 'Ej. Universidad'}"></label>
+      <label class="field"><span>Descripción (opcional)</span><input class="inp" id="fmDesc" maxlength="40" autocomplete="off" enterkeyhint="${isLink ? 'next' : 'done'}" ${isLink ? 'data-next="fmUrl"' : ''} placeholder="${isLink ? 'Ej. Apuntes y notas' : 'Ej. Estudios'}"></label>`}
       ${isLink
         ? `<label class="field"><span>Enlace</span><input class="inp" id="fmUrl" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="https://…"></label>`
+        : fixed ? (st.kind === 'habits' ? '<p class="seg-note" style="margin:-6px 4px 18px">Dentro añades tus hábitos (gimnasio, leer…) y los marcas cada día. Verás la racha y un calendario de cada uno.</p>' : st.kind === 'uni' ? '<p class="seg-note" style="margin:-6px 4px 18px">Arriba verás lo próximo de tu calendario «Universidad» de Google Calendar; debajo, enlaces, profesores y notas.</p>' : '<p class="seg-note" style="margin:0 4px 18px">Muestra lo que tienes hoy en Google Calendar. Tócalo para ver los próximos 7 días.</p>')
         : `<div class="field"><span id="fmTypeL">Tipo de carpeta</span><div class="seg" role="group" aria-labelledby="fmTypeL"><button type="button" data-k="notes">Notas</button><button type="button" data-k="copy">Copiado rápido</button><button type="button" data-k="list">Lista</button><button type="button" data-k="money">Finanzas</button></div><p class="seg-note" id="fmTypeNote"></p></div>`}
-      <div class="field"><span>Icono</span><div class="icons">${iconGrid(st.icon)}</div></div>
+      <div class="field"><span>Color</span>${swatchesHTML(st.color)}</div>
+      ${isCal ? '' : `<div class="field"><span>Icono</span><div class="icons">${iconGrid(st.icon)}</div></div>`}
     </div>`, 'page');
   const f = sh.el;
   const nameI = $('#fmName', f), descI = $('#fmDesc', f), urlI = $('#fmUrl', f), saveB = $('#fmSave', f), prev = $('#fmPrev', f);
-  nameI.value = st.name; descI.value = st.desc; if (urlI) urlI.value = st.url;
-  const nEnt = ex && !isLink ? folderEntries(id).length : 0;
+  if (nameI) { nameI.value = st.name; descI.value = st.desc; }
+  if (urlI) urlI.value = st.url;
+  const nEnt = ex && hasEntries(ex.kind) ? folderEntries(id).length : 0;
   let locked = false;
   $$('.seg button', f).forEach(b => { b.disabled = nEnt > 0 && !kindsCompatible(ex.kind, b.dataset.k); if (b.disabled) locked = true; });
   const upd = () => {
+    const tv = tintVars(st.color);
+    prev.className = 'tile' + (isCal ? ' calw' : '') + (tv ? ' tint' : ''); prev.style.cssText = tv;
     prev.innerHTML = tileInner({ ...st, name: st.name.trim() || (isLink ? 'Acceso' : 'Carpeta'), desc: st.desc.trim() });
-    prev.classList.toggle('ph', !st.name.trim());
-    saveB.disabled = !st.name.trim() || (isLink && !safeUrl(st.url));
+    prev.classList.toggle('ph', !isCal && !st.name.trim());
+    saveB.disabled = !isCal && (!st.name.trim() || (isLink && !safeUrl(st.url)));
     $$('.icopt', f).forEach(b => b.setAttribute('aria-pressed', String(b.dataset.icon === st.icon)));
     $$('.seg button', f).forEach(b => b.setAttribute('aria-pressed', String(b.dataset.k === st.kind)));
+    paintSwatches(f, st.color);
     const note = $('#fmTypeNote', f);
     if (note) note.textContent = (({
       copy: 'Tarjetas con título: un toque copia su contenido al portapapeles.',
       list: 'Apunta cosas pendientes y toca el círculo para tacharlas: al momento desaparecen.',
       money: 'Apunta gastos e ingresos de cada mes, con presupuesto, categorías y gráfica.',
     })[st.kind] || 'Lista de notas con título y contenido. Puedes buscarlas, editarlas y copiarlas.') + (locked ? ' Para cambiar a otro tipo, la carpeta tiene que estar vacía.' : '');
-    if (!isLink) nameI.placeholder = ({ list: 'Ej. Compra', money: 'Ej. Finanzas', copy: 'Ej. Textos rápidos' })[st.kind] || 'Ej. Universidad';
+    if (nameI && !fixed) nameI.placeholder = ({ list: 'Ej. Compra', money: 'Ej. Finanzas', copy: 'Ej. Textos rápidos' })[st.kind] || 'Ej. Apuntes';
   };
-  nameI.addEventListener('input', () => { st.name = nameI.value; upd(); });
-  descI.addEventListener('input', () => { st.desc = descI.value; upd(); });
+  if (nameI) {
+    nameI.addEventListener('input', () => { st.name = nameI.value; upd(); });
+    descI.addEventListener('input', () => { st.desc = descI.value; upd(); });
+  }
   if (urlI) urlI.addEventListener('input', () => { st.url = urlI.value; upd(); });
   f.addEventListener('click', e => {
+    const sw = e.target.closest('.sw-c');
+    if (sw) { st.color = sw.dataset.color || ''; upd(); return; }
     const ic = e.target.closest('.icopt');
     if (ic) { st.icon = ic.dataset.icon; st.touched = true; upd(); return; }
     const k = e.target.closest('.seg button');
     if (k && !k.disabled) { if (!st.touched) st.icon = defaultIcon(k.dataset.k); st.kind = k.dataset.k; upd(); }
   });
   saveB.addEventListener('click', () => {
-    const name = st.name.trim();
+    const name = isCal ? 'Hoy' : st.name.trim();
     if (!name || (isLink && !safeUrl(st.url))) return;
     if (!canWrite()) return;
-    const data = { kind: st.kind, name, desc: st.desc.trim(), icon: st.icon, url: st.kind === 'link' ? safeUrl(st.url) : '' };
+    const data = { kind: st.kind, name, desc: isCal ? '' : st.desc.trim(), icon: st.icon, url: st.kind === 'link' ? safeUrl(st.url) : '' };
     let created = null;
     if (ex) {
-      if (!S.home.items[id]) { sh.close(); return; }
-      Object.assign(S.home.items[id], data);
+      const it = S.home.items[id];
+      if (!it) { sh.close(); return; }
+      Object.assign(it, data);
+      if (st.color) it.color = st.color; else delete it.color;
     } else {
       created = newId();
       S.home.items[created] = { id: created, ...data };
+      if (st.color) S.home.items[created].color = st.color;
+      if (st.kind === 'uni') S.home.items[created].calName = 'Universidad';
       S.home.order.push(created);
     }
     saveHome();
     sh.close();
     render();
-    if (created) setTimeout(() => revealTile(created), 60);
+    if (created) { setTimeout(() => revealTile(created), 60); if (st.kind === 'uni') Cal.refresh(true); }
   });
   upd();
 }
@@ -1681,38 +2140,79 @@ function openItemForm({ id = null, kind = 'notes', preset = null } = {}){
 function openIconSheet(id){
   if (!canWrite()) return;
   const it = S.home.items[id]; if (!it) return;
-  const sh = makeSheet(`<div class="grab"></div><div class="sh-head"><span class="shic">${svg(it.icon)}</span><div class="sh-ht"><div class="sh-title">Cambiar icono</div><div class="sh-sub">${esc(it.name)}</div></div></div><div class="fbody"><div class="icons">${iconGrid(it.icon)}</div></div>`, 'tall');
-  sh.el.addEventListener('click', e => {
-    const b = e.target.closest('.icopt'); if (!b) return;
+  const st = { icon: it.icon, color: it.color || '' };
+  const sh = makeSheet(`<div class="grab"></div><div class="sh-head"><span class="shic" id="isPrev">${svg(it.icon)}</span><div class="sh-ht"><div class="sh-title">${it.kind === 'group' || it.kind === 'cal' ? 'Color' : 'Icono y color'}</div><div class="sh-sub">${esc(it.name)}</div></div></div>
+    <div class="fbody"><div class="field"><span>Color</span>${swatchesHTML(st.color)}</div>${it.kind === 'group' || it.kind === 'cal' ? '' : `<div class="field"><span>Icono</span><div class="icons">${iconGrid(it.icon)}</div></div>`}</div>`, 'tall');
+  const pv = $('#isPrev', sh.el);
+  const apply = () => {
     if (!canWrite() || !S.home.items[id]) return;
-    S.home.items[id].icon = b.dataset.icon;
-    saveHome(); render(); sh.close();
+    const x = S.home.items[id];
+    x.icon = st.icon; if (st.color) x.color = st.color; else delete x.color;
+    const tv = tintVars(st.color); pv.className = 'shic' + (tv ? ' tint' : ''); pv.style.cssText = tv; pv.innerHTML = svg(st.icon);
+    paintSwatches(sh.el, st.color);
+    $$('.icopt', sh.el).forEach(b => b.setAttribute('aria-pressed', String(b.dataset.icon === st.icon)));
+    saveHome(); render();
+  };
+  sh.el.addEventListener('click', e => {
+    const sw = e.target.closest('.sw-c'); if (sw) { st.color = sw.dataset.color || ''; apply(); return; }
+    const b = e.target.closest('.icopt'); if (!b) return;
+    st.icon = b.dataset.icon; apply(); sh.close();
   });
+  apply();
 }
 
 function itemActions(id){
   const it = S.home.items[id]; if (!it) return;
+  const inGroup = groupOf(id);
+  const reorg = () => inGroup && G.id ? startEditing('grp') : startEditing('home');
   const acts = [];
+  if (it.kind === 'group') {
+    acts.push(
+      { icon: 'folder-open', label: 'Abrir', run: () => openGroup(id) },
+      { icon: 'pencil', label: 'Nombre, color y contenido', run: () => openGroupForm({ id }) },
+      { icon: 'move', label: 'Reorganizar inicio', run: () => startEditing('home') },
+      { sep: true },
+      { icon: 'layout-grid', label: 'Deshacer carpeta', sub: 'Lo de dentro vuelve al inicio', danger: true, run: () => askUngroup(id) },
+    );
+    actionSheet({ title: it.name, sub: plural(it.children.length, 'elemento', 'elementos'), icon: 'layers', actions: acts });
+    return;
+  }
+  if (it.kind === 'cal') {
+    acts.push(
+      { icon: 'calendar-days', label: 'Ver agenda', sub: 'Próximos 7 días', run: openAgenda },
+      { icon: 'refresh-cw', label: 'Actualizar', run: () => { if (Cal.usable()) { Cal.refresh(true); toast('Actualizando…', 'refresh-cw'); } else toast('Disponible en la versión conectada a Google', 'info'); } },
+      { icon: 'droplet', label: 'Color', run: () => openIconSheet(id) },
+      { icon: 'move', label: 'Reorganizar', run: () => startEditing('home') },
+      { sep: true },
+      { icon: 'trash-2', label: 'Quitar widget', danger: true, run: () => askDeleteItem(id) },
+    );
+    actionSheet({ title: 'Widget de calendario', sub: 'Google Calendar', icon: 'calendar-days', actions: acts });
+    return;
+  }
   if (it.kind === 'link') { const u = safeUrl(it.url); if (u) acts.push({ icon: 'external-link', label: 'Abrir', href: u }); }
   else acts.push({ icon: 'folder-open', label: 'Abrir', run: () => openFolder(id) });
   acts.push(
     { icon: 'pencil', label: 'Editar nombre', run: () => openItemForm({ id }) },
-    { icon: 'shapes', label: 'Cambiar icono', run: () => openIconSheet(id) },
+    { icon: 'palette', label: 'Icono y color', run: () => openIconSheet(id) },
+    { icon: 'folder-input', label: inGroup ? 'Mover a otra carpeta' : 'Mover a carpeta', run: () => moveToGroupSheet(id) },
+    ...(inGroup ? [{ icon: 'log-out', label: `Sacar de «${inGroup.name}»`, run: () => takeOutOfGroup(id) }] : []),
     { icon: 'copy-plus', label: 'Duplicar', run: () => duplicateItem(id) },
-    { icon: 'move', label: 'Reorganizar', run: () => startEditing('home') },
+    { icon: 'move', label: 'Reorganizar', run: reorg },
     { sep: true },
     { icon: 'trash-2', label: 'Eliminar', danger: true, run: () => askDeleteItem(id) },
   );
-  actionSheet({ title: it.name, sub: kindLabel(it.kind), icon: it.icon, actions: acts });
+  actionSheet({ title: it.name, sub: kindLabel(it.kind) + (inGroup ? ` · en «${inGroup.name}»` : ''), icon: it.icon, actions: acts });
 }
 
 function duplicateItem(id){
   if (!canWrite()) return;
-  const it = S.home.items[id]; if (!it) return;
+  const it = S.home.items[id]; if (!it || it.kind === 'group' || it.kind === 'cal') return;
   const nid = newId();
-  S.home.items[nid] = { ...it, id: nid, name: (it.name + ' (copia)').slice(0, 60) };
-  S.home.order.splice(S.home.order.indexOf(id) + 1, 0, nid);
-  if (it.kind !== 'link') for (const e of folderEntries(id)) { const ne = { ...e, id: newId(), folder: nid }; S.entries.set(ne.id, ne); saveEntry(ne); }
+  S.home.items[nid] = { ...clone(it), id: nid, name: (it.name + ' (copia)').slice(0, 60) };
+  const g = groupOf(id);
+  if (g) g.children.splice(g.children.indexOf(id) + 1, 0, nid);
+  else S.home.order.splice(S.home.order.indexOf(id) + 1, 0, nid);
+  if (hasEntries(it.kind)) for (const e of folderEntries(id)) { const ne = { ...e, id: newId(), folder: nid }; S.entries.set(ne.id, ne); saveEntry(ne); }
   saveHome();
   render();
   setTimeout(() => revealTile(nid), 60);
@@ -1722,19 +2222,21 @@ function duplicateItem(id){
 async function askDeleteItem(id){
   if (!canWrite()) return;
   const it = S.home.items[id]; if (!it) return;
-  const n = it.kind === 'link' ? 0 : folderEntries(id).length;
+  if (it.kind === 'group') { askUngroup(id); return; }
+  const n = hasEntries(it.kind) ? folderEntries(id).length : 0;
   const msg = it.kind === 'link' ? 'Se quitará este acceso directo.'
-    : n ? `También se borrarán ${countLabel(it.kind, n)}. No se puede deshacer.`
+    : it.kind === 'cal' ? 'Podrás volver a ponerlo desde + → Widget de calendario. Tu Google Calendar no cambia.'
+    : n ? `También se borrará lo que tiene dentro (${n}). No se puede deshacer.`
     : 'La carpeta está vacía.';
-  const ok = await confirmDialog({ title: `¿Eliminar «${it.name}»?`, message: msg });
+  const ok = await confirmDialog({ title: it.kind === 'cal' ? '¿Quitar el widget?' : `¿Eliminar «${it.name}»?`, message: msg, ok: it.kind === 'cal' ? 'Quitar' : 'Eliminar' });
   if (!ok || !canWrite() || !S.home.items[id]) return;
+  detachItem(id);
   delete S.home.items[id];
-  S.home.order = S.home.order.filter(x => x !== id);
   saveHome();
   for (const e of folderEntries(id)) { S.entries.delete(e.id); removeEntryDoc(e.id); }
   if (S.folder === id) closeFolder();
   render();
-  toast('Eliminado', 'trash-2');
+  toast(it.kind === 'cal' ? 'Widget quitado' : 'Eliminado', 'trash-2');
 }
 
 /* ================= notas y textos ================= */
@@ -1774,7 +2276,20 @@ function entryActions(id){
   const e = S.entries.get(id); const it = S.home.items[S.folder];
   if (!e || !it) return;
   const name = e.title.trim() || firstLine(e.body) || 'Sin título';
-  const acts = it.kind === 'notes' ? [
+  const isN = it.kind === 'notes' || it.kind === 'uni';
+  if (it.kind === 'habits') {
+    const done = habitSet(e).has(dkey(new Date()));
+    actionSheet({ title: name, sub: e.goal >= 7 || !e.goal ? 'Cada día' : `${e.goal} veces por semana`, icon: 'flame', actions: [
+      { icon: done ? 'rotate-ccw' : 'check', label: done ? 'Desmarcar hoy' : 'Marcar hoy', run: () => toggleHabitDay(e.id, dkey(new Date()), cellFor(e.id)) },
+      { icon: 'calendar-days', label: 'Calendario y racha', run: () => habitSheet(e.id) },
+      { icon: 'pencil', label: 'Editar', run: () => openHabitForm(e.id) },
+      { icon: 'move', label: 'Reorganizar', run: () => startEditing(S.folder) },
+      { sep: true },
+      { icon: 'trash-2', label: 'Eliminar', danger: true, run: () => askDeleteEntry(e.id) },
+    ]});
+    return;
+  }
+  const acts = isN ? [
     { icon: 'copy', label: 'Copiar contenido', sync: true, run: () => copyAndTell(e.body || e.title) },
     { icon: 'pencil', label: 'Abrir y editar', run: () => Editor.open(e.id) },
     { icon: 'copy-plus', label: 'Duplicar', run: () => duplicateEntry(e.id) },
@@ -1795,8 +2310,8 @@ function entryActions(id){
     { sep: true },
     { icon: 'trash-2', label: 'Eliminar', danger: true, run: () => askDeleteEntry(e.id) },
   ];
-  const sub = it.kind === 'notes' ? fmtDate(e.updated) : it.kind === 'list' ? (e.done ? 'Tachado' : 'Pendiente') : 'Texto rápido';
-  actionSheet({ title: name, sub, icon: it.kind === 'notes' ? 'file-text' : it.kind === 'list' ? 'list-checks' : 'copy', actions: acts });
+  const sub = isN ? fmtDate(e.updated) : it.kind === 'list' ? (e.done ? 'Tachado' : 'Pendiente') : 'Texto rápido';
+  actionSheet({ title: name, sub, icon: isN ? 'file-text' : it.kind === 'list' ? 'list-checks' : 'copy', actions: acts });
 }
 
 function renumber(list){
@@ -2148,6 +2663,30 @@ function migrate(){
   const h = S.home;
   if ((h.mig || 0) >= MIG) return;
   const vals = Object.values(h.items);
+  if ((h.mig || 0) < 1) migrate1(h, vals);
+  if ((h.mig || 0) < 2) {
+    // 2: la carpeta Universidad pasa a ser la sección de Universidad (sus notas se quedan) y aparece el widget de calendario.
+    if (!vals.some(i => i.kind === 'uni')) {
+      const u = h.items.universidad;
+      if (u && u.kind === 'notes') { u.kind = 'uni'; u.calName = 'Universidad'; if (!u.color) u.color = 'lavanda'; if (u.desc === 'Estudios') u.desc = 'Exámenes'; }
+      else if (!h.items['universidad-uni']) {
+        const id = 'universidad-uni';
+        h.items[id] = { id, kind: 'uni', name: 'Universidad', desc: 'Exámenes', icon: 'graduation-cap', url: '', color: 'lavanda', calName: 'Universidad' };
+        h.order.splice(Math.min(2, h.order.length), 0, id);
+      }
+    }
+    if (!vals.some(i => i.kind === 'cal') && !h.items.calendario) {
+      h.items.calendario = { id: 'calendario', kind: 'cal', name: 'Hoy', desc: '', icon: 'calendar-days', url: '' };
+      h.order.unshift('calendario');
+    }
+  }
+  h.mig = MIG;
+  S.home = cleanHome(h);
+  saveHome();
+  scheduleRender();
+  Cal.refresh(true);
+}
+function migrate1(h, vals){
   if (!vals.some(i => i.kind === 'money')) {
     const f = h.items.finanzas;
     if (f && f.kind === 'notes' && !folderEntries('finanzas').length) { f.kind = 'money'; f.budget = 0; if (f.desc === 'Dinero') f.desc = 'Gastos'; }
@@ -2162,12 +2701,11 @@ function migrate(){
     h.items.recordatorios = { id: 'recordatorios', kind: 'list', name: 'Recordatorios', desc: 'Tareas', icon: 'list-checks', url: '' };
     h.order.push('recordatorios');
   }
-  h.mig = MIG;
-  saveHome();
-  scheduleRender();
 }
 function maintenance(){
   if (!S.ready || !writableNow()) return;
+  // hoja nueva: se guarda el inicio para que el servidor (y los atajos de Siri) conozcan tus secciones
+  if (P.db === SS && SS.ready && !SS.view('app')) saveHome();
   migrate();
   for (const e of S.entries.values()) {
     if (!e.done || Fume.timers.has(e.id)) continue;
@@ -2186,6 +2724,15 @@ function tileMeta(it){
     const cm = curYM(), t = todayStr(); let s = 0;
     for (const e of S.entries.values()) if (e.folder === it.id && !e.rep && !e.inc && e.day && e.day <= t && ymOf(e.day) === cm) s += e.amt;
     return s ? `<span class="meta">${esc(money0(s))}</span>` : '';
+  }
+  if (it.kind === 'habits') {
+    const h = habitsDoneToday(it.id);
+    return h.n ? `<span class="meta cnt">${h.done}/${h.n}</span>` : '';
+  }
+  if (it.kind === 'uni') {
+    const nx = uniNext(it); if (!nx) return '';
+    const n = relDays(evDay0(nx));
+    return n <= 30 ? `<span class="meta">${n <= 0 ? 'Hoy' : n === 1 ? 'Mañana' : 'en ' + n + ' d'}</span>` : '';
   }
   return '';
 }
@@ -2660,7 +3207,7 @@ function bindMoney(){
   longPress(box, '.mv', id => moneyActions(id), () => false, true);
   $('#fMore').addEventListener('click', () => {
     const it = S.home.items[S.folder]; if (!it) return;
-    if (it.kind === 'money') moneyMenu(it); else if (it.kind === 'list') listMenu(it);
+    if (it.kind === 'money') moneyMenu(it); else if (it.kind === 'list') listMenu(it); else if (it.kind === 'uni') uniMenu(it);
   });
   let rt = null;
   window.addEventListener('resize', () => {
@@ -2669,11 +3216,944 @@ function bindMoney(){
   });
 }
 
+/* ================= colores ================= */
+function swatchesHTML(sel){
+  return `<div class="swatches" role="group" aria-label="Color"><button type="button" class="sw-c none" data-color="" aria-label="Sin color" aria-pressed="${!sel}">${svg('x')}</button>${COLORS.map(c => `<button type="button" class="sw-c" data-color="${c.k}" style="--c:${c.h}" aria-label="${esc(c.n)}" aria-pressed="${c.k === sel}">${svg('check')}</button>`).join('')}</div>`;
+}
+const paintSwatches = (root, sel) => $$('.sw-c', root).forEach(b => b.setAttribute('aria-pressed', String((b.dataset.color || '') === (sel || ''))));
+
+/* ================= carpetas que agrupan ================= */
+// Una carpeta (kind 'group') guarda los ids de lo que tiene dentro en «children».
+// Lo de dentro no está en el inicio (order). Al deshacerla, todo vuelve al inicio: no se borra nada.
+const G = { id: null, back: null, hideT: null };
+let lastGroup = '';
+function openGroup(id){
+  const g = S.home.items[id]; if (!g || g.kind !== 'group') return;
+  G.id = id; G.back = null; lastGroup = '';
+  if (S.editing === 'home') S.editing = null;
+  renderHome();
+  const el = $('#grp');
+  clearTimeout(G.hideT);
+  el.inert = false; el.setAttribute('aria-hidden', 'false');
+  el.classList.add('on');
+  $('#grpPanel').scrollTop = 0;
+  // dos fotogramas: en el primero se crea la capa difuminada; en el segundo empieza la animación
+  requestAnimationFrame(() => requestAnimationFrame(() => { if (G.id === id) el.classList.add('show'); }));
+}
+function closeGroup(){
+  if (!G.id) return;
+  if (S.editing === 'grp') S.editing = null;
+  G.id = null;
+  const el = $('#grp');
+  if (el.contains(document.activeElement)) document.activeElement.blur();
+  el.classList.remove('show'); el.inert = true; el.setAttribute('aria-hidden', 'true');
+  clearTimeout(G.hideT);
+  G.hideT = setTimeout(() => { if (!G.id) { el.classList.remove('on'); renderHome(); } }, 300);
+}
+function renderGroup(){
+  if (!G.id) return;
+  const g = S.home.items[G.id];
+  if (!g || g.kind !== 'group') { closeGroup(); return; }
+  const kids = g.children.map(id => S.home.items[id]).filter(Boolean);
+  const ed = S.editing === 'grp';
+  const html = kids.length ? kids.map(tileHTML).join('') : `<div class="grp-empty">Esta carpeta está vacía.<br>Mantén pulsado algo del inicio y elige «Mover a carpeta».</div>`;
+  if (html !== lastGroup) { $('#gGrid').innerHTML = html; lastGroup = html; }
+  const nm = $('#grpName'), pn = $('#grpPanel'), tv = tintVars(g.color);
+  nm.textContent = g.name;
+  nm.className = 'grp-name' + (tv ? ' tint' : ''); nm.style.cssText = tv;
+  nm.setAttribute('aria-label', `${g.name}. Toca para cambiar el nombre o el color`);
+  pn.className = 'grp-panel' + (tv ? ' tint' : ''); pn.style.cssText = tv;
+  $('#grp').classList.toggle('editing', ed);
+  $('#grpDone').hidden = !ed;
+  $('#grpHint').textContent = ed ? 'Arrastra para mover · Pulsa Listo al terminar' : kids.length ? 'Toca el nombre para cambiarlo · Mantén pulsado para sacar algo' : 'Toca el nombre para cambiarlo';
+}
+function detachItem(id){
+  const h = S.home;
+  h.order = h.order.filter(x => x !== id);
+  for (const it of Object.values(h.items)) if (it.kind === 'group') it.children = it.children.filter(x => x !== id);
+}
+function moveIntoGroup(id, gid, silent){
+  if (!canWrite()) return;
+  const g = S.home.items[gid], it = S.home.items[id];
+  if (!g || g.kind !== 'group' || !groupable(it)) return;
+  detachItem(id);
+  g.children.push(id);
+  saveHome(); render();
+  if (!silent) toast(`Movido a «${g.name}»`, 'check');
+}
+function takeOutOfGroup(id){
+  if (!canWrite()) return;
+  const g = groupOf(id); if (!g) return;
+  g.children = g.children.filter(x => x !== id);
+  const at = S.home.order.indexOf(g.id);
+  S.home.order.splice(at >= 0 ? at + 1 : S.home.order.length, 0, id);
+  saveHome(); render();
+  toast('Sacado al inicio', 'log-out');
+}
+// Crea una carpeta con estos elementos, en el sitio del primero.
+function makeGroup(ids, name, color){
+  const h = S.home, gid = newId();
+  ids = ids.filter(id => groupable(h.items[id]));
+  const pos = ids.map(id => h.order.indexOf(id)).filter(i => i >= 0);
+  const at = pos.length ? Math.min(...pos) : h.order.length;
+  const before = h.order.slice(0, at).filter(x => !ids.includes(x));
+  ids.forEach(detachItem);
+  h.items[gid] = { id: gid, kind: 'group', name: name || 'Carpeta', desc: '', icon: 'layers', url: '', children: ids.slice() };
+  if (color) h.items[gid].color = color;
+  const rest = h.order.filter(x => !before.includes(x));
+  h.order = [...before, gid, ...rest];
+  return gid;
+}
+// Al soltar una tarjeta encima de otra mientras se reorganiza.
+function mergeOnDrop(dragId, targetId){
+  if (!canWrite()) return;
+  const a = S.home.items[dragId], b = S.home.items[targetId];
+  if (!a || !b || dragId === targetId || !groupable(a)) return;
+  if (b.kind === 'group') { moveIntoGroup(dragId, targetId); return; }
+  if (!groupable(b)) return;
+  const gid = makeGroup([targetId, dragId], 'Carpeta');
+  saveHome(); S.editing = null; render();
+  setTimeout(() => { openGroup(gid); toast('Carpeta creada · toca el nombre para cambiarlo', 'layers'); }, 120);
+}
+function askUngroup(gid){
+  const g = S.home.items[gid]; if (!g) return;
+  confirmDialog({ title: `¿Deshacer «${g.name}»?`, message: g.children.length ? 'Lo que tiene dentro vuelve al inicio. No se borra nada.' : 'La carpeta está vacía.', ok: 'Deshacer' }).then(ok => {
+    if (!ok || !canWrite() || !S.home.items[gid]) return;
+    const kids = S.home.items[gid].children.filter(id => S.home.items[id]);
+    const at = S.home.order.indexOf(gid);
+    S.home.order.splice(at >= 0 ? at : S.home.order.length, at >= 0 ? 1 : 0, ...kids);
+    delete S.home.items[gid];
+    if (G.id === gid) closeGroup();
+    saveHome(); render();
+    toast(kids.length ? 'Carpeta deshecha' : 'Carpeta quitada', 'check');
+  });
+}
+function openGroupForm({ id = null, pre = [] } = {}){
+  if (!canWrite()) return;
+  const ex = id ? S.home.items[id] : null;
+  if (id && (!ex || ex.kind !== 'group')) return;
+  const st = { name: ex ? ex.name : '', color: ex ? ex.color || '' : '', sel: ex ? ex.children.slice() : pre.filter(x => groupable(S.home.items[x])) };
+  const cands = [...(ex ? ex.children : []), ...S.home.order.filter(x => groupable(S.home.items[x]))].filter((x, i, a) => a.indexOf(x) === i && S.home.items[x]);
+  const sh = makeSheet(`
+    <div class="fhead"><button class="tbtn l" type="button" data-close>Cancelar</button><div class="ft">${ex ? 'Editar carpeta' : 'Nueva carpeta'}</div><button class="tbtn strong r" id="gfSave" type="button">${ex ? 'Guardar' : 'Crear'}</button></div>
+    <div class="fbody">
+      <div class="preview"><div class="cell"><div class="wig"><div class="tile" id="gfPrev"></div></div></div></div>
+      <label class="field"><span>Nombre</span><input class="inp" id="gfName" maxlength="40" autocomplete="off" enterkeyhint="done" placeholder="Ej. Estudios"></label>
+      <div class="field"><span>Color</span>${swatchesHTML(st.color)}</div>
+      <div class="field"><span>Qué va dentro (${cands.length ? 'toca para elegir' : 'no hay nada que agrupar'})</span>
+        <div>${cands.map(x => { const it = S.home.items[x]; return `<button type="button" class="pick" data-id="${esc(x)}" aria-pressed="false"><span${tintAttr(it.color, 'pic')}>${svg(it.icon)}</span><span class="al">${esc(it.name)}<small>${esc(kindLabel(it.kind))}</small></span><span class="ck">${svg('check')}</span></button>`; }).join('')}</div>
+      </div>
+      <p class="foot">En el inicio se ven los 4 primeros en pequeño; dentro puede haber más. También puedes crear una carpeta arrastrando una tarjeta encima de otra mientras reorganizas.</p>
+      ${ex ? '<button class="dbtn" type="button" id="gfDel">Deshacer carpeta</button>' : ''}
+    </div>`, 'page');
+  const f = sh.el, nameI = $('#gfName', f), prev = $('#gfPrev', f), save = $('#gfSave', f);
+  nameI.value = st.name;
+  const upd = () => {
+    const tv = tintVars(st.color);
+    prev.className = 'tile' + (tv ? ' tint' : ''); prev.style.cssText = tv;
+    prev.innerHTML = tileInner({ kind: 'group', name: st.name.trim() || 'Carpeta', desc: '', children: st.sel });
+    prev.classList.toggle('ph', !st.name.trim());
+    $$('.pick', f).forEach(b => b.setAttribute('aria-pressed', String(st.sel.includes(b.dataset.id))));
+    paintSwatches(f, st.color);
+    save.disabled = !st.name.trim();
+  };
+  nameI.addEventListener('input', () => { st.name = nameI.value; upd(); });
+  f.addEventListener('click', e => {
+    const sw = e.target.closest('.sw-c'); if (sw) { st.color = sw.dataset.color || ''; upd(); return; }
+    const p = e.target.closest('.pick');
+    if (p) { const x = p.dataset.id; st.sel = st.sel.includes(x) ? st.sel.filter(y => y !== x) : [...st.sel, x]; upd(); return; }
+    if (e.target.closest('#gfDel')) { sh.close(); setTimeout(() => askUngroup(id), 200); }
+  });
+  save.addEventListener('click', () => {
+    const name = st.name.trim();
+    if (!name || !canWrite()) return;
+    if (ex) {
+      const g = S.home.items[id]; if (!g) { sh.close(); return; }
+      const out = g.children.filter(x => !st.sel.includes(x));
+      g.name = name; if (st.color) g.color = st.color; else delete g.color;
+      for (const x of st.sel) if (!g.children.includes(x)) detachItem(x);
+      g.children = st.sel.filter(x => S.home.items[x]);
+      const at = S.home.order.indexOf(id);
+      S.home.order.splice(at >= 0 ? at + 1 : S.home.order.length, 0, ...out);
+    } else {
+      const gid = makeGroup(st.sel, name, st.color);
+      setTimeout(() => revealTile(gid), 60);
+    }
+    saveHome(); sh.close(); render();
+  });
+  upd();
+  if (!ex) setTimeout(() => { try { nameI.focus({ preventScroll: true }); } catch (e) {} }, 350);
+}
+function moveToGroupSheet(id){
+  if (!canWrite()) return;
+  const it = S.home.items[id]; if (!groupable(it)) return;
+  const cur = groupOf(id);
+  const groups = Object.values(S.home.items).filter(g => g.kind === 'group' && g !== cur);
+  actionSheet({ title: 'Mover a carpeta', sub: it.name, icon: 'folder-input', actions: [
+    ...groups.map(g => ({ icon: 'layers', label: g.name, sub: plural(g.children.length, 'elemento', 'elementos'), run: () => moveIntoGroup(id, g.id) })),
+    { icon: 'plus', label: 'Nueva carpeta con esto', run: () => openGroupForm({ pre: [id] }) },
+    ...(cur ? [{ sep: true }, { icon: 'log-out', label: `Sacar de «${cur.name}»`, run: () => takeOutOfGroup(id) }] : []),
+  ]});
+}
+
+/* ================= calendario (Google Calendar a través del servidor) ================= */
+// El servidor (Codigo.gs) lee tu Google Calendar con tu cuenta y devuelve los eventos de los
+// próximos 7 días y los del calendario de la universidad. Aquí se guarda una copia para abrir rápido.
+const K_CAL = 'miespacio.agenda.v1';
+let calListeners = [];
+const Cal = {
+  data: null, state: 'idle', busy: false, lastTry: 0, msg: '',
+  init(){ const d = ls.get(K_CAL); if (d && d.ok && Array.isArray(d.ev)) this.data = d; },
+  usable(){ return P.db === SS && !!SS.token() && !SS.authFailed; },
+  unis(){ return [...new Set(Object.values(S.home.items).filter(i => i.kind === 'uni').map(i => i.calName || 'Universidad'))].slice(0, 5); },
+  wanted(){ return Object.values(S.home.items).some(i => i.kind === 'cal' || i.kind === 'uni'); },
+  async refresh(force){
+    if (!this.usable() || this.busy) return;
+    if (!force && (!this.wanted() || Date.now() - this.lastTry < 60000)) return;
+    this.busy = true; this.lastTry = Date.now(); this.paint();
+    try {
+      const r = await SS.request({ op: 'cal', token: SS.token(), dias: 15, atras: (new Date().getDay() + 6) % 7, unis: this.unis() });
+      if (r && r.ok && Array.isArray(r.ev)) { r.at = Date.now(); this.data = r; this.state = 'ok'; ls.set(K_CAL, r); }
+      else if (r && r.error === 'auth') { this.state = 'idle'; SS.onAuthLost(); }
+      else if (r && r.error === 'op') this.state = 'old';
+      else if (r && r.error === 'calendario') { this.state = 'perm'; this.msg = r.msg || ''; }
+      else this.state = 'error';
+    } catch (e) { this.state = 'error'; }
+    finally { this.busy = false; this.paint(); }
+  },
+  // pide datos nuevos si los que hay tienen más de 5 minutos (o son de otro día)
+  maybe(){ const d = this.data; if (!d || Date.now() - (d.at || 0) > 5 * 60000 || d.hoy !== todayStr()) this.refresh(false); },
+  paint(){ lastHome = ''; lastFolder = ''; lastUni = ''; scheduleRender(); calListeners.forEach(f => f()); },
+};
+const evDay0 = ev => ev.all ? ev.s : ymd(new Date(ev.s));
+const evDay1 = ev => { if (ev.all) { const d = parseDay(ev.e || ev.s); d.setDate(d.getDate() - 1); const s = ymd(d); return s < ev.s ? ev.s : s; } return ymd(new Date(Math.max(ev.s, ev.e - 1))); };
+const evOn = (ev, day) => evDay0(ev) <= day && day <= evDay1(ev);
+const hm = ms => tf.format(new Date(ms));
+function evTime(ev, day){
+  if (ev.all) return 'Todo el día';
+  const a = evDay0(ev), b = evDay1(ev);
+  if (day && a < day && b > day) return 'Todo el día';
+  if (day && a < day) return 'Hasta las ' + hm(ev.e);
+  if (day && b > day) return 'Desde las ' + hm(ev.s);
+  return ev.e > ev.s ? `${hm(ev.s)} – ${hm(ev.e)}` : hm(ev.s);
+}
+const calEvents = () => Cal.data && Array.isArray(Cal.data.ev) ? Cal.data.ev : [];
+const evColor = ev => /^#[0-9a-f]{3,8}$/i.test(ev.col || '') ? ev.col : '#8e8e93';
+const relDays = day => Math.round((parseDay(day) - parseDay(todayStr())) / 864e5);
+const relLabel = day => { const n = relDays(day); return n <= 0 ? 'Hoy' : n === 1 ? 'Mañana' : `En ${n} días`; };
+const fullDay = day => { const d = parseDay(day); return `${cap(WEEKDAYS[d.getDay()])} ${d.getDate()} de ${MONTHS[d.getMonth()]}${d.getFullYear() !== new Date().getFullYear() ? ' de ' + d.getFullYear() : ''}`; };
+// Si no se puede mostrar el calendario, el porqué (para el widget y Universidad).
+function calStatus(){
+  if (P.db !== SS) return { msg: 'Tu calendario', sub: 'Se ve en la versión de la app conectada a Google (GitHub).' };
+  if (!SS.token() || SS.authFailed) return { msg: 'Sin sesión', sub: 'Entra con tu contraseña para ver tu calendario.' };
+  if (Cal.state === 'old') return { msg: 'Falta un paso', sub: 'Actualiza el servidor (Codigo.gs) para ver tu calendario.' };
+  if (Cal.state === 'perm') return { msg: 'Falta el permiso', sub: 'En la hoja: menú Mi espacio → 3. Conectar Google Calendar.' };
+  if (!Cal.data) return Cal.state === 'error' ? { msg: 'Sin conexión', sub: 'Se actualizará en cuanto haya internet.' } : { msg: 'Cargando…', sub: 'Leyendo tu Google Calendar' };
+  return null;
+}
+function calWidgetInner(it){
+  const now = new Date(), t = ymd(now), ms = now.getTime();
+  const left = `<span class="cw-l"><span class="cw-wd">${esc(WEEKDAYS[now.getDay()])}</span><span class="cw-d">${now.getDate()}</span><span class="cw-m">${esc(MONTHS[now.getMonth()])}</span></span>`;
+  let right = '';
+  const st = calStatus();
+  if (st && !classEventsOn(t).length) right = `<span class="cw-none">${esc(st.msg)}</span><span class="cw-sub">${esc(st.sub)}</span>`;
+  else {
+    const all = dayEvents(t);
+    const left2 = all.filter(ev => ev.all || ev.e > ms);
+    if (left2.length) {
+      const shown = left2.slice(0, left2.length > 3 ? 2 : 3);
+      right = shown.map(ev => {
+        const live = !ev.all && ev.s <= ms && ev.e > ms;
+        return `<span class="cw-ev${live ? ' now' : ''}" style="--ec:${evColor(ev)}"><i></i><b>${esc(ev.t || '(Sin título)')}</b><small>${esc(live ? 'Ahora · hasta las ' + hm(ev.e) : evTime(ev, t))}${ev.loc ? ' · ' + esc(ev.loc) : ''}</small></span>`;
+      }).join('') + (left2.length > shown.length ? `<span class="cw-more">${plural(left2.length - shown.length, 'evento más', 'eventos más')} hoy</span>` : '');
+    } else {
+      let next = null;
+      for (let i = 1; i <= 7 && !next; i++) { const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i), day = ymd(d); next = dayEvents(day).filter(ev => evDay0(ev) === day).sort((a, b) => (b.all ? 1 : 0) - (a.all ? 1 : 0) || a.s - b.s)[0] || null; }
+      right = `<span class="cw-none">${all.length ? 'Has terminado por hoy' : 'Nada más por hoy'}</span>` + (next ? `<span class="cw-sub">${esc(dayLabel(evDay0(next)))}${next.all ? '' : ' · ' + esc(hm(next.s))}: ${esc(next.t || '(Sin título)')}</span>` : '<span class="cw-sub">Sin eventos en los próximos días</span>');
+    }
+  }
+  return left + `<span class="cw-r">${right}</span>`;
+}
+function agendaHTML(){
+  const st = calStatus();
+  const now = Date.now();
+  let h = st ? `<div class="u-msg" style="margin-bottom:6px"><b>${esc(st.msg)}</b><br>${esc(st.sub)}</div>` : '';
+  const base = new Date();
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(base.getFullYear(), base.getMonth(), base.getDate() + i), day = ymd(d);
+    const list = dayEvents(day).sort((a, b) => (b.all ? 1 : 0) - (a.all ? 1 : 0) || a.s - b.s);
+    h += `<div class="ag-day">${esc(i < 2 ? dayLabel(day) + ' · ' + d.getDate() + ' ' + MONTHS_S[d.getMonth()] : fullDay(day))}<span>${list.length ? plural(list.length, 'evento', 'eventos') : ''}</span></div>`;
+    h += list.length ? list.map(x => `<div class="ag-ev${!x.all && x.e <= now ? ' past' : ''}" style="--ec:${evColor(x)}"><i></i><b>${esc(x.t || '(Sin título)')}</b><span class="h">${esc(evTime(x, day))}</span><small>${esc([x.loc, x.cal].filter(Boolean).join(' · '))}</small></div>`).join('') : '<div class="ag-free">Libre</div>';
+  }
+  return h;
+}
+function openAgenda(){
+  const sh = makeSheet(`<div class="grab"></div><div class="sh-head"><span class="shic">${svg('calendar-days')}</span><div class="sh-ht"><div class="sh-title">Agenda</div><div class="sh-sub" id="agSub"></div></div><button class="iconbtn" type="button" id="agRef" aria-label="Actualizar" style="margin-left:auto">${svg('refresh-cw')}</button></div>
+    <div class="fbody"><div id="agBody"></div><a class="mlink" href="https://calendar.google.com/" target="_blank" rel="noopener noreferrer" style="margin-top:18px">${svg('calendar')}<span>Abrir Google Calendar</span>${svg('external-link')}</a></div>`, 'tall');
+  const paint = () => {
+    $('#agBody', sh.el).innerHTML = agendaHTML();
+    $('#agSub', sh.el).textContent = Cal.busy ? 'Actualizando…' : Cal.data && Cal.data.at ? `Próximos 7 días · ${fmtDate(Cal.data.at).toLowerCase()}` : 'Próximos 7 días';
+  };
+  paint();
+  calListeners.push(paint);
+  sh.onclose = () => { calListeners = calListeners.filter(f => f !== paint); };
+  $('#agRef', sh.el).addEventListener('click', () => { if (Cal.usable()) Cal.refresh(true); else toast('Disponible en la versión conectada a Google', 'info'); });
+  Cal.maybe();
+}
+function addCalWidget(){
+  if (!canWrite()) return;
+  const ex = Object.values(S.home.items).find(i => i.kind === 'cal');
+  if (ex) { toast('Ya tienes el widget en el inicio', 'info'); revealTile(ex.id); return; }
+  const id = S.home.items.calendario ? newId() : 'calendario';
+  S.home.items[id] = { id, kind: 'cal', name: 'Hoy', desc: '', icon: 'calendar-days', url: '' };
+  S.home.order.unshift(id);
+  saveHome(); render();
+  setTimeout(() => revealTile(id), 60);
+  Cal.refresh(true);
+}
+
+/* ================= universidad ================= */
+// Arriba, lo próximo del calendario «Universidad» de Google Calendar; debajo, enlaces, profesores y notas.
+let lastUni = '';
+const uniEntries = (fid, t) => folderEntries(fid).filter(e => e.t === t);
+function uniCal(it){
+  const u = Cal.data && Cal.data.uni && Cal.data.uni[it.calName || 'Universidad'];
+  return u || null;
+}
+function uniNext(it){ const u = uniCal(it); return u && u.found && u.ev && u.ev.length ? u.ev.find(ev => evDay1(ev) >= todayStr()) || null : null; }
+const initials = s => String(s || '?').replace(/^(dr|dra|prof|profa)\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map(w => w.charAt(0)).join('').toUpperCase() || '?';
+function examWhen(ev){ const d = evDay0(ev); return fullDay(d) + (ev.all ? '' : ' · ' + hm(ev.s)); }
+function uniHTML(it){
+  const fid = it.id, cname = it.calName || 'Universidad', tv = tintVars(it.color);
+  let h = `<div class="u-sec"><h3>Próximos exámenes</h3><button type="button" data-act="ucal" aria-label="Elegir calendario">${esc(cname)}${svg('chevron-right')}</button></div>`;
+  const st = calStatus();
+  if (st) h += `<div class="u-msg"><b>${esc(st.msg)}</b><br>${esc(st.sub)}</div>`;
+  else {
+    const u = uniCal(it);
+    if (!u) h += `<div class="u-msg">${Cal.busy ? 'Buscando tu calendario…' : `Pulsa actualizar para buscar el calendario «${esc(cname)}».`}${Cal.busy ? '' : '<br><button class="pill" type="button" data-act="urefresh">Actualizar</button>'}</div>`;
+    else if (!u.found) h += `<div class="u-msg">No encuentro un calendario llamado <b>«${esc(cname)}»</b> en tu Google Calendar.<br><button class="pill" type="button" data-act="ucal">Elegir calendario</button></div>`;
+    else {
+      const list = (u.ev || []).filter(ev => evDay1(ev) >= todayStr());
+      if (!list.length) h += `<div class="u-msg">No hay nada próximo en <b>«${esc(u.name)}»</b>. Cuando añadas exámenes o entregas en ese calendario, aparecerán aquí.</div>`;
+      else {
+        const x = list[0], n = Math.max(0, relDays(evDay0(x)));
+        h += `<button type="button" class="xhero${tv ? ' tint' : ''}"${tv ? ` style="${tv}"` : ''} data-ev="0"><span class="xh-k">Lo siguiente</span><span class="xh-row"><span class="xh-t"><b>${esc(x.t || '(Sin título)')}</b><small>${esc(examWhen(x))}${x.loc ? '<br>' + esc(x.loc) : ''}</small></span><span class="xh-n">${n === 0 ? '<b>Hoy</b>' : `<b>${n}</b><small>${n === 1 ? 'día' : 'días'}</small>`}</span></span></button>`;
+        if (list.length > 1) h += `<div class="xlist">${list.slice(1, 25).map((ev, i) => { const d = parseDay(evDay0(ev)); return `<button type="button" class="xrow" data-ev="${i + 1}"><span class="xd"><b>${d.getDate()}</b><small>${MONTHS_S[d.getMonth()]}</small></span><span class="xt"><b>${esc(ev.t || '(Sin título)')}</b><small>${esc([cap(WEEKDAYS[d.getDay()]), ev.all ? '' : hm(ev.s), ev.loc].filter(Boolean).join(' · '))}</small></span><span class="xc">${esc(relLabel(evDay0(ev)).replace('En ', 'en ').replace(' días', ' d'))}</span></button>`; }).join('')}</div>`;
+      }
+    }
+  }
+  const wl = weekLabel(Sched.off, weekMonday(Sched.off));
+  h += `<div class="u-sec"><h3>Horario</h3><span class="sc-wk"><button type="button" data-act="wprev" aria-label="Semana anterior"${Sched.off <= -1 ? ' disabled' : ''}>${svg('chevron-left')}</button><button type="button" data-act="wnow" class="sc-wl">${esc(wl.range)}</button><button type="button" data-act="wnext" aria-label="Semana siguiente"${Sched.off >= 1 ? ' disabled' : ''}>${svg('chevron-right')}</button></span></div><p class="sc-sub">${esc(wl.name)}</p>`;
+  h += schedHTML(it);
+  h += `<button type="button" class="u-add" data-act="uclass" style="margin-top:8px">${svg('plus')}<span>Añadir clase</span></button>`;
+  const links = uniEntries(fid, 'link').sort(snipSort);
+  h += `<div class="u-sec"><h3>Enlaces</h3></div><div class="chips">${links.map(e => { const u = safeUrl(e.url); return `<div class="cell" data-id="${esc(e.id)}"><a class="ulink" href="${esc(u || '#')}"${isWeb(u) ? ' target="_blank" rel="noopener noreferrer"' : ''} draggable="false">${svg('link')}<span>${esc(e.title || u)}</span></a></div>`; }).join('')}<button type="button" class="ulink add" data-act="ulink">${svg('plus')}<span>${links.length ? 'Añadir' : 'Añadir enlace (ej. Enseñanza Virtual)'}</span></button></div>`;
+  const profs = uniEntries(fid, 'prof').sort((a, b) => a.title.localeCompare(b.title, 'es'));
+  h += `<div class="u-sec"><h3>Profesores</h3><span>${profs.length || ''}</span></div>`;
+  if (profs.length) h += `<div class="profs">${profs.map(e => `<div class="cell" data-id="${esc(e.id)}"><div class="prof" role="button" tabindex="0"><span${tintAttr(it.color, 'av')}>${esc(initials(e.title))}</span><span class="pt"><b>${esc(e.title || 'Sin nombre')}</b><small>${esc([e.subj, e.room].filter(Boolean).join(' · ') || e.mail || 'Toca para ver los datos')}</small></span>${svg('chevron-right')}</div></div>`).join('')}</div>`;
+  h += `<button type="button" class="u-add" data-act="uprof" style="margin-top:8px">${svg('plus')}<span>Añadir profesor</span></button>`;
+  const nn = uniEntries(fid, '').length;
+  h += `<div class="u-sec u-notes-h"><h3>Notas</h3><button type="button" data-act="unote">${svg('plus')}Nueva</button></div>`;
+  if (!nn) h += `<button type="button" class="u-add" data-act="unote">${svg('notepad-pen')}<span>Apuntes, horarios, lo que quieras</span></button>`;
+  return h;
+}
+function renderUni(it){
+  const html = uniHTML(it);
+  if (html === lastUni) return;
+  $('#fUni').innerHTML = html; lastUni = html;
+}
+function examSheet(it, i){
+  const u = uniCal(it); if (!u || !u.ev) return;
+  const list = u.ev.filter(ev => evDay1(ev) >= todayStr()), ev = list[i]; if (!ev) return;
+  const lists = Object.values(S.home.items).filter(x => x.kind === 'list');
+  const d = parseDay(evDay0(ev));
+  const text = `${ev.t || 'Examen'} · ${examWhen(ev)}${ev.loc ? ' · ' + ev.loc : ''}`;
+  const sh = makeSheet(`<div class="grab"></div><div class="sh-head"><span${tintAttr(it.color, 'shic')}>${svg('graduation-cap')}</span><div class="sh-ht"><div class="sh-title">${esc(ev.t || '(Sin título)')}</div><div class="sh-sub">${esc(relLabel(evDay0(ev)))}</div></div></div>
+    <div class="fbody">
+      <div class="info"><div class="row">${svg('calendar')}<span class="iv"><small>Cuándo</small>${esc(examWhen(ev))}${ev.all ? '' : ' – ' + esc(hm(ev.e))}</span></div>${ev.loc ? `<div class="row">${svg('map-pin')}<span class="iv"><small>Dónde</small>${esc(ev.loc)}</span></div>` : ''}${ev.desc ? `<div class="row">${svg('file-text')}<span class="iv"><small>Detalles</small>${esc(ev.desc)}</span></div>` : ''}</div>
+      <div class="btnrow"><button type="button" id="exCopy">${svg('copy')}Copiar</button>${lists.length ? `<button type="button" id="exTodo">${svg('list-checks')}A ${esc(lists[0].name)}</button>` : ''}<a href="https://calendar.google.com/calendar/r/day/${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}" target="_blank" rel="noopener noreferrer">${svg('external-link')}Ver en Google</a></div>
+      <p class="foot">Viene de tu calendario «${esc(u.name)}». Para cambiarlo, edítalo en Google Calendar.</p>
+    </div>`, 'tall');
+  $('#exCopy', sh.el).addEventListener('click', () => copyAndTell(text));
+  const td = $('#exTodo', sh.el);
+  if (td) td.addEventListener('click', () => {
+    if (!canWrite()) return;
+    const L = lists[0], now = Date.now();
+    let min = Infinity; for (const e of folderEntries(L.id)) if (e.pos < min) min = e.pos;
+    const e = { id: newId(), folder: L.id, title: `Estudiar: ${ev.t || 'examen'} (${d.getDate()} ${MONTHS_S[d.getMonth()]})`.slice(0, 300), body: '', pos: (Number.isFinite(min) ? min : 1000) - 1000, created: now, updated: now };
+    S.entries.set(e.id, e); saveEntry(e); scheduleRender();
+    sh.close(); toast(`Añadido a ${L.name}`, 'check');
+  });
+}
+function chooseUniCal(it){
+  if (!canWrite()) return;
+  const names = Cal.data && Array.isArray(Cal.data.cals) ? Cal.data.cals : [];
+  if (!names.length) {
+    toast(Cal.usable() ? 'Cargando tus calendarios…' : 'Disponible en la versión conectada a Google', 'info');
+    if (Cal.usable()) Cal.refresh(true);
+    return;
+  }
+  actionSheet({ title: 'Calendario de la universidad', sub: 'Lo que tenga se muestra arriba', icon: 'calendar-days', actions: names.map(n => ({ icon: n === it.calName ? 'circle-check' : 'calendar', label: n, run: () => {
+    if (!canWrite() || !S.home.items[it.id]) return;
+    S.home.items[it.id].calName = n; saveHome(); lastUni = ''; renderFolder(); Cal.refresh(true);
+  } })) });
+}
+function openProfForm(id = null){
+  if (!canWrite()) return;
+  const fid = S.folder, ex = id ? S.entries.get(id) : null;
+  if (!fid || (id && !ex)) return;
+  const sh = makeSheet(`
+    <div class="fhead"><button class="tbtn l" type="button" data-close>Cancelar</button><div class="ft">${ex ? 'Editar profesor' : 'Nuevo profesor'}</div><button class="tbtn strong r" id="pfSave" type="button">${ex ? 'Guardar' : 'Añadir'}</button></div>
+    <div class="fbody">
+      <label class="field"><span>Nombre</span><input class="inp" id="pfName" maxlength="80" autocomplete="off" autocapitalize="words" enterkeyhint="next" data-next="pfSubj" placeholder="Ej. María López"></label>
+      <label class="field"><span>Asignatura</span><input class="inp" id="pfSubj" maxlength="120" autocomplete="off" enterkeyhint="next" data-next="pfMail" placeholder="Ej. Control Automático"></label>
+      <label class="field"><span>Correo</span><input class="inp" id="pfMail" type="email" inputmode="email" maxlength="200" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" data-next="pfPh" placeholder="nombre@us.es"></label>
+      <label class="field"><span>Teléfono (opcional)</span><input class="inp" id="pfPh" type="tel" inputmode="tel" maxlength="40" enterkeyhint="next" data-next="pfRoom"></label>
+      <label class="field"><span>Despacho</span><input class="inp" id="pfRoom" maxlength="120" autocomplete="off" enterkeyhint="done" placeholder="Ej. Edificio L, 2.14"></label>
+      <label class="field"><span>Tutorías</span><textarea class="inp short" id="pfHours" maxlength="600" rows="3" placeholder="Ej. Lunes y miércoles de 11:00 a 13:00"></textarea></label>
+      <label class="field"><span>Notas</span><textarea class="inp short" id="pfBody" rows="4" placeholder="Cómo evalúa, qué le gusta en los exámenes…"></textarea></label>
+      ${ex ? '<button class="dbtn" type="button" id="pfDel">Eliminar profesor</button>' : ''}
+    </div>`, 'page');
+  const f = sh.el, F = k => $('#pf' + k, f), save = F('Save');
+  const map = { Name: 'title', Subj: 'subj', Mail: 'mail', Ph: 'ph', Room: 'room', Hours: 'hours', Body: 'body' };
+  for (const [k, v] of Object.entries(map)) F(k).value = ex ? ex[v] || '' : '';
+  const upd = () => { save.disabled = !F('Name').value.trim(); };
+  F('Name').addEventListener('input', upd); upd();
+  if (ex) F('Del').addEventListener('click', () => { sh.close(); setTimeout(() => askDeleteUni(id), 200); });
+  save.addEventListener('click', () => {
+    const name = F('Name').value.trim(); if (!name || !canWrite()) return;
+    const now = Date.now();
+    const e = ex && S.entries.get(ex.id) ? S.entries.get(ex.id) : cleanEntry(newId(), { folder: fid, t: 'prof', created: now, pos: nextPos(fid) });
+    for (const [k, v] of Object.entries(map)) e[v] = k === 'Body' || k === 'Hours' ? F(k).value.trim() : F(k).value.replace(/\s+/g, ' ').trim();
+    e.t = 'prof'; e.updated = now;
+    S.entries.set(e.id, e); saveEntry(e);
+    sh.close(); renderFolder();
+    toast(ex ? 'Guardado' : 'Profesor añadido', 'check');
+  });
+  if (!ex) setTimeout(() => { try { F('Name').focus({ preventScroll: true }); } catch (e) {} }, 350);
+}
+function profSheet(id){
+  const e = S.entries.get(id), it = S.home.items[S.folder]; if (!e || !it) return;
+  const mail = e.mail.trim(), ph = e.ph.trim();
+  const rows = [
+    mail && ['mail', 'Correo', mail],
+    ph && ['phone', 'Teléfono', ph],
+    e.room && ['door-open', 'Despacho', e.room],
+    e.hours && ['clock', 'Tutorías', e.hours],
+    e.body.trim() && ['file-text', 'Notas', e.body.trim()],
+  ].filter(Boolean);
+  const sh = makeSheet(`<div class="grab"></div><div class="sh-head"><span${tintAttr(it.color, 'av')}>${esc(initials(e.title))}</span><div class="sh-ht"><div class="sh-title">${esc(e.title || 'Sin nombre')}</div>${e.subj ? `<div class="sh-sub">${esc(e.subj)}</div>` : ''}</div></div>
+    <div class="fbody">
+      <div class="btnrow">${mail ? `<a href="mailto:${esc(encodeURI(mail))}">${svg('send')}Escribir</a><button type="button" id="prCopy">${svg('copy')}Copiar correo</button>` : ''}${ph ? `<a href="tel:${esc(ph.replace(/[^\d+]/g, ''))}">${svg('phone')}Llamar</a>` : ''}<button type="button" id="prEdit">${svg('pencil')}Editar</button></div>
+      ${rows.length ? `<div class="info">${rows.map(([ic, k, v]) => `<div class="row">${svg(ic)}<span class="iv"><small>${esc(k)}</small>${esc(v)}</span></div>`).join('')}</div>` : '<p class="foot">Aún no hay datos. Pulsa Editar para añadir su correo, despacho o tutorías.</p>'}
+    </div>`, 'tall');
+  const cp = $('#prCopy', sh.el); if (cp) cp.addEventListener('click', () => copyAndTell(mail, 'Correo copiado'));
+  $('#prEdit', sh.el).addEventListener('click', () => { sh.close(); setTimeout(() => openProfForm(id), 200); });
+}
+function openUniLinkForm(id = null){
+  if (!canWrite()) return;
+  const fid = S.folder, ex = id ? S.entries.get(id) : null;
+  if (!fid || (id && !ex)) return;
+  const hasEV = uniEntries(fid, 'link').some(e => /ev\.us\.es/i.test(e.url));
+  const sh = makeSheet(`
+    <div class="fhead"><button class="tbtn l" type="button" data-close>Cancelar</button><div class="ft">${ex ? 'Editar enlace' : 'Nuevo enlace'}</div><button class="tbtn strong r" id="lkSave" type="button">${ex ? 'Guardar' : 'Añadir'}</button></div>
+    <div class="fbody">
+      ${!ex && !hasEV ? `<button class="mlink" type="button" id="lkEV" style="margin:0 0 18px">${svg('graduation-cap')}<span>Enseñanza Virtual (ev.us.es)</span>${svg('plus')}</button>` : ''}
+      <label class="field"><span>Nombre</span><input class="inp" id="lkName" maxlength="40" autocomplete="off" enterkeyhint="next" data-next="lkUrl" placeholder="Ej. Horario"></label>
+      <label class="field"><span>Enlace</span><input class="inp" id="lkUrl" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="https://…"></label>
+    </div>`, 'page');
+  const n = $('#lkName', sh.el), u = $('#lkUrl', sh.el), save = $('#lkSave', sh.el);
+  n.value = ex ? ex.title : ''; u.value = ex ? ex.url : '';
+  const upd = () => { save.disabled = !safeUrl(u.value) || !n.value.trim(); };
+  n.addEventListener('input', upd); u.addEventListener('input', upd); upd();
+  const ev = $('#lkEV', sh.el);
+  if (ev) ev.addEventListener('click', () => { n.value = 'Enseñanza Virtual'; u.value = 'https://ev.us.es'; upd(); save.click(); });
+  save.addEventListener('click', () => {
+    const url = safeUrl(u.value), title = n.value.trim();
+    if (!url || !title || !canWrite()) return;
+    const now = Date.now();
+    const e = ex && S.entries.get(ex.id) ? S.entries.get(ex.id) : cleanEntry(newId(), { folder: fid, t: 'link', created: now, pos: nextPos(fid) });
+    e.title = title.slice(0, 40); e.url = url; e.t = 'link'; e.updated = now;
+    S.entries.set(e.id, e); saveEntry(e);
+    sh.close(); renderFolder();
+  });
+}
+async function askDeleteUni(id){
+  if (!canWrite()) return;
+  const e = S.entries.get(id); if (!e) return;
+  const ok = await confirmDialog({ title: `¿Eliminar «${(e.title || 'esto').slice(0, 40)}»?`, message: 'No se puede deshacer.' });
+  if (!ok || !canWrite() || !S.entries.has(id)) return;
+  S.entries.delete(id); removeEntryDoc(id);
+  renderFolder(); toast('Eliminado', 'trash-2');
+}
+function uniEntryActions(id){
+  const e = S.entries.get(id); if (!e) return;
+  if (e.t === 'prof') actionSheet({ title: e.title, sub: e.subj || 'Profesor', icon: 'user', actions: [
+    { icon: 'user', label: 'Ver datos', run: () => profSheet(id) },
+    { icon: 'pencil', label: 'Editar', run: () => openProfForm(id) },
+    ...(e.mail ? [{ icon: 'copy', label: 'Copiar correo', sync: true, run: () => copyAndTell(e.mail, 'Correo copiado') }] : []),
+    { sep: true },
+    { icon: 'trash-2', label: 'Eliminar', danger: true, run: () => askDeleteUni(id) },
+  ]});
+  else if (e.t === 'link') actionSheet({ title: e.title, sub: e.url, icon: 'link', actions: [
+    { icon: 'external-link', label: 'Abrir', href: safeUrl(e.url) },
+    { icon: 'pencil', label: 'Editar', run: () => openUniLinkForm(id) },
+    { icon: 'copy', label: 'Copiar enlace', sync: true, run: () => copyAndTell(e.url, 'Enlace copiado') },
+    { sep: true },
+    { icon: 'trash-2', label: 'Eliminar', danger: true, run: () => askDeleteUni(id) },
+  ]});
+}
+function uniAddMenu(){
+  actionSheet({ title: 'Añadir', actions: [
+    { icon: 'notepad-pen', label: 'Nota', sub: 'Apuntes, horarios, lo que quieras', run: newNote },
+    { icon: 'book-open', label: 'Clase', sub: 'Se añade a tu horario cada semana', run: () => openClassForm() },
+    { icon: 'user', label: 'Profesor', sub: 'Correo, despacho y tutorías', run: () => openProfForm() },
+    { icon: 'link', label: 'Enlace', sub: 'Enseñanza Virtual, horarios, apuntes…', run: () => openUniLinkForm() },
+  ]});
+}
+function uniMenu(it){
+  actionSheet({ title: it.name, sub: 'Universidad', icon: it.icon, actions: [
+    { icon: 'calendar-days', label: 'Elegir calendario', sub: `Ahora: «${it.calName || 'Universidad'}»`, run: () => chooseUniCal(it) },
+    { icon: 'refresh-cw', label: 'Actualizar exámenes', run: () => { if (Cal.usable()) { Cal.refresh(true); toast('Actualizando…', 'refresh-cw'); } else toast('Disponible en la versión conectada a Google', 'info'); } },
+    { sep: true },
+    { icon: 'pencil', label: 'Nombre, icono y color', run: () => openItemForm({ id: it.id }) },
+  ]});
+}
+function bindUni(){
+  const box = $('#fUni');
+  box.addEventListener('click', e => {
+    const it = S.home.items[S.folder]; if (!it || it.kind !== 'uni') return;
+    const a = e.target.closest('[data-act]');
+    if (a) {
+      const k = a.dataset.act;
+      if (k === 'ucal') chooseUniCal(it);
+      else if (k === 'wprev' || k === 'wnext') { Sched.off = Math.max(-1, Math.min(1, Sched.off + (k === 'wnext' ? 1 : -1))); lastUni = ''; renderFolder(); }
+      else if (k === 'wnow') { if (Sched.off) { Sched.off = 0; lastUni = ''; renderFolder(); } }
+      else if (k === 'uclass') openClassForm();
+      else if (k === 'urefresh') Cal.refresh(true);
+      else if (k === 'ulink') openUniLinkForm();
+      else if (k === 'uprof') openProfForm();
+      else if (k === 'unote') newNote();
+      return;
+    }
+    const x = e.target.closest('[data-ev]'); if (x) { examSheet(it, +x.dataset.ev); return; }
+    const cl = e.target.closest('[data-cls]'); if (cl) { classSheet(cl.dataset.cls); return; }
+    const se = e.target.closest('[data-sev]'); if (se) { const ev = Sched.evs[+se.dataset.sev]; if (ev) eventSheet(ev); return; }
+    const cell = e.target.closest('.cell[data-id]');
+    if (cell && e.target.closest('.prof')) profSheet(cell.dataset.id);
+  });
+  longPress(box, '.prof, .ulink', id => uniEntryActions(id), () => false, true);
+}
+
+/* ================= horario (Universidad) ================= */
+// Clases que añade Pablo (se repiten cada semana, de lunes a viernes) + eventos de Google Calendar de esa semana.
+const HM_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+const hexRgba = (h, a) => { const m = /^#?([0-9a-f]{6})$/i.exec(h || ''); if (!m) return `rgba(142,142,147,${a})`; const n = parseInt(m[1], 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
+const DOW_S = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
+const DOW_L = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+const atTime = (date, hm) => { const [h, m] = hm.split(':').map(Number); return new Date(date.getFullYear(), date.getMonth(), date.getDate(), h, m).getTime(); };
+const allClasses = () => [...S.entries.values()].filter(e => e.t === 'class' && e.dow >= 1 && e.dow <= 5 && HM_RE.test(e.hs) && HM_RE.test(e.he) && S.home.items[e.folder] && S.home.items[e.folder].kind === 'uni');
+const classColor = e => colorOf(e.col) ? e.col : COLORS[[...e.title].reduce((a, c) => a + c.charCodeAt(0), 0) % COLORS.length].k;
+// Las clases de un día como si fueran eventos (para el widget, la agenda y el horario).
+function classEventsOn(day){
+  const d = parseDay(day), dow = d.getDay();
+  return allClasses().filter(e => e.dow === dow).map(e => ({ t: e.title || 'Clase', s: atTime(d, e.hs), e: atTime(d, e.he), loc: e.room, col: colorOf(classColor(e)).h, cal: 'Clase', cls: e.id }));
+}
+// Todo lo de un día: eventos de Google Calendar + clases.
+const dayEvents = day => [...calEvents().filter(ev => evOn(ev, day)), ...classEventsOn(day)];
+// Lunes de la semana que se ve: los fines de semana se enseña la siguiente.
+function weekMonday(off){
+  const t = new Date(), dow = t.getDay();
+  const base = new Date(t.getFullYear(), t.getMonth(), t.getDate() - ((dow + 6) % 7) + (dow === 0 || dow === 6 ? 7 : 0));
+  base.setDate(base.getDate() + 7 * off);
+  return base;
+}
+const Sched = { off: 0, evs: [] };
+function weekLabel(off, mon){
+  const fri = new Date(mon); fri.setDate(mon.getDate() + 4);
+  const wkend = [0, 6].includes(new Date().getDay());
+  const name = off === 0 ? (wkend ? 'La semana que viene' : 'Esta semana') : off === 1 ? (wkend ? 'Dentro de dos semanas' : 'La semana que viene') : 'La semana pasada';
+  const range = mon.getMonth() === fri.getMonth() ? `${mon.getDate()}–${fri.getDate()} ${MONTHS_S[fri.getMonth()]}` : `${mon.getDate()} ${MONTHS_S[mon.getMonth()]} – ${fri.getDate()} ${MONTHS_S[fri.getMonth()]}`;
+  return { name, range };
+}
+// Reparte en columnas lo que se solapa dentro de un día.
+function lanes(list){
+  list.sort((a, b) => a.s - b.s || b.e - a.e);
+  let group = [], end = -Infinity;
+  const flush = () => { const n = Math.max(...group.map(x => x.lane)) + 1; group.forEach(x => { x.n = n; }); group = []; };
+  for (const x of list) {
+    if (group.length && x.s >= end) { flush(); end = -Infinity; }
+    const used = new Set(group.filter(g => g.e > x.s).map(g => g.lane));
+    let l = 0; while (used.has(l)) l++;
+    x.lane = l; group.push(x); end = Math.max(end, x.e);
+  }
+  if (group.length) flush();
+  return list;
+}
+function schedHTML(it){
+  const off = Sched.off, mon = weekMonday(off), today = todayStr(), now = Date.now();
+  const days = [0, 1, 2, 3, 4].map(i => { const d = new Date(mon); d.setDate(mon.getDate() + i); return d; });
+  const st = calStatus();
+  Sched.evs = [];
+  const cols = days.map(d => {
+    const day = ymd(d);
+    const timed = [], allDay = [];
+    for (const ev of st ? [] : calEvents()) {
+      if (!evOn(ev, day)) continue;
+      if (ev.all || evDay0(ev) < day && evDay1(ev) > day) { allDay.push(ev); continue; }
+      const s = Math.max(ev.s, atTime(d, '00:00')), e = Math.min(ev.e, atTime(d, '23:59'));
+      if (e > s) timed.push({ ev, s, e, kind: 'ev' });
+    }
+    for (const c of allClasses().filter(c => c.dow === d.getDay())) timed.push({ cls: c, s: atTime(d, c.hs), e: Math.max(atTime(d, c.he), atTime(d, c.hs) + 15 * 60000), kind: 'cl' });
+    return { d, day, timed: lanes(timed), allDay };
+  });
+  // horas visibles: de 8 a 14 como mínimo, ampliadas a lo que haya (entre 7 y 23)
+  let h0 = 8, h1 = 14;
+  for (const c of cols) for (const x of c.timed) {
+    const a = new Date(x.s), b = new Date(x.e);
+    h0 = Math.min(h0, a.getHours());
+    h1 = Math.max(h1, b.getHours() + (b.getMinutes() ? 1 : 0));
+  }
+  h0 = Math.max(7, h0); h1 = Math.min(24, Math.max(h1, h0 + 4));
+  const HH = 46, H = (h1 - h0) * HH;
+  const y = (ms, d) => { const t = new Date(ms); const v = (t.getHours() + t.getMinutes() / 60 - h0) * HH; return Math.max(0, Math.min(H, v)); };
+  const anyAll = cols.some(c => c.allDay.length);
+  let h = `<div class="sched"><div class="sc-row sc-head"><span></span>${cols.map(c => `<span class="sc-dh${c.day === today ? ' today' : ''}">${DOW_S[c.d.getDay()]}<b>${c.d.getDate()}</b></span>`).join('')}</div>`;
+  if (anyAll) h += `<div class="sc-row sc-all"><span></span>${cols.map(c => `<span>${c.allDay.slice(0, 2).map(ev => { Sched.evs.push(ev); return `<button type="button" class="sc-ad" data-sev="${Sched.evs.length - 1}" style="--ec:${evColor(ev)};background:${hexRgba(evColor(ev), .2)}">${esc(ev.t || '(Sin título)')}</button>`; }).join('')}${c.allDay.length > 2 ? `<small>+${c.allDay.length - 2}</small>` : ''}</span>`).join('')}</div>`;
+  h += `<div class="sc-row sc-body" style="height:${H}px">`;
+  h += `<span class="sc-gut">${Array.from({ length: h1 - h0 + 1 }, (_, i) => `<i style="top:${i * HH}px">${h0 + i}</i>`).join('')}</span>`;
+  for (let i = 1; i < h1 - h0; i++) h += `<b class="sc-line" style="top:${i * HH}px"></b>`;
+  for (const c of cols) {
+    h += `<span class="sc-col${c.day === today ? ' today' : ''}">`;
+    for (const x of c.timed) {
+      const top = y(x.s), ht = Math.max(18, y(x.e) - top - 2), w = 100 / x.n, left = x.lane * w;
+      const pos = `top:${top.toFixed(1)}px;height:${ht.toFixed(1)}px;left:calc(${left}% + 1px);width:calc(${w}% - 2px)`;
+      const past = x.e < now;
+      if (x.kind === 'cl') {
+        const k = classColor(x.cls), tv = tintVars(k);
+        h += `<button type="button" class="sc-b cl${past ? ' past' : ''}${x.n > 1 ? ' nar' : ''}" data-cls="${esc(x.cls.id)}" style="${pos};${tv}"><b>${esc(x.cls.title || 'Clase')}</b>${ht > 34 && x.cls.room ? `<small>${esc(x.cls.room)}</small>` : ''}</button>`;
+      } else {
+        Sched.evs.push(x.ev);
+        const col = evColor(x.ev);
+        h += `<button type="button" class="sc-b ev${past ? ' past' : ''}${x.n > 1 ? ' nar' : ''}" data-sev="${Sched.evs.length - 1}" style="${pos};--ec:${col};background:${hexRgba(col, .14)};box-shadow:inset 0 0 0 1px ${hexRgba(col, .6)}"><b>${esc(x.ev.t || '(Sin título)')}</b>${ht > 34 ? `<small>${esc(hm(x.ev.s))}</small>` : ''}</button>`;
+      }
+    }
+    if (c.day === today) { const t = new Date(); const hh = t.getHours() + t.getMinutes() / 60; if (hh >= h0 && hh <= h1) h += `<i class="sc-now" style="top:${((hh - h0) * HH).toFixed(1)}px"></i>`; }
+    h += '</span>';
+  }
+  h += '</div>';
+  h += `<div class="sc-leg"><span><i class="k-cl"></i>Tus clases</span><span><i class="k-ev"></i>Google Calendar</span></div></div>`;
+  if (st && P.db === SS) h += `<p class="foot" style="margin-top:8px">Sin eventos del calendario: ${esc(st.sub)}</p>`;
+  return h;
+}
+function eventSheet(ev){
+  const day = evDay0(ev);
+  const sh = makeSheet(`<div class="grab"></div><div class="sh-head"><span class="shic" style="color:${evColor(ev)}">${svg('calendar')}</span><div class="sh-ht"><div class="sh-title">${esc(ev.t || '(Sin título)')}</div><div class="sh-sub">${esc(ev.cal || 'Google Calendar')}</div></div></div>
+    <div class="fbody"><div class="info"><div class="row">${svg('clock')}<span class="iv"><small>Cuándo</small>${esc(fullDay(day))} · ${esc(evTime(ev, day))}</span></div>${ev.loc ? `<div class="row">${svg('map-pin')}<span class="iv"><small>Dónde</small>${esc(ev.loc)}</span></div>` : ''}${ev.desc ? `<div class="row">${svg('file-text')}<span class="iv"><small>Detalles</small>${esc(ev.desc)}</span></div>` : ''}</div>
+    <p class="foot">Viene de Google Calendar. Para cambiarlo, edítalo allí.</p></div>`, 'tall');
+  return sh;
+}
+function classSheet(id){
+  const e = S.entries.get(id); if (!e) return;
+  const k = classColor(e);
+  const sh = makeSheet(`<div class="grab"></div><div class="sh-head"><span${tintAttr(k, 'shic')}>${svg('book-open')}</span><div class="sh-ht"><div class="sh-title">${esc(e.title || 'Clase')}</div><div class="sh-sub">Cada ${esc(DOW_L[e.dow])} · ${esc(e.hs)} – ${esc(e.he)}</div></div></div>
+    <div class="fbody">
+      ${e.room || e.body.trim() ? `<div class="info">${e.room ? `<div class="row">${svg('door-open')}<span class="iv"><small>Aula</small>${esc(e.room)}</span></div>` : ''}${e.body.trim() ? `<div class="row">${svg('file-text')}<span class="iv"><small>Notas</small>${esc(e.body.trim())}</span></div>` : ''}</div>` : ''}
+      <div class="btnrow"><button type="button" id="csEdit">${svg('pencil')}Editar</button><button type="button" id="csDup">${svg('copy-plus')}Otro día</button><button type="button" id="csDel">${svg('trash-2')}Eliminar</button></div>
+    </div>`, 'tall');
+  $('#csEdit', sh.el).addEventListener('click', () => { sh.close(); setTimeout(() => openClassForm({ id }), 200); });
+  $('#csDup', sh.el).addEventListener('click', () => { sh.close(); setTimeout(() => openClassForm({ copy: id }), 200); });
+  $('#csDel', sh.el).addEventListener('click', () => { sh.close(); setTimeout(() => askDeleteUni(id), 200); });
+}
+function openClassForm({ id = null, copy = null, dow = 0 } = {}){
+  if (!canWrite()) return;
+  const fid = S.folder, it = S.home.items[fid];
+  if (!it || it.kind !== 'uni') return;
+  const ex = id ? S.entries.get(id) : null, src = ex || (copy ? S.entries.get(copy) : null);
+  const subjects = [...new Set([...allClasses().map(c => c.title), ...uniEntries(fid, 'prof').map(p => p.subj)].map(s => (s || '').trim()).filter(Boolean))].slice(0, 12);
+  const st = { title: src ? src.title : '', days: ex ? [ex.dow] : copy ? [] : dow ? [dow] : [], hs: src ? src.hs : '09:00', he: src ? src.he : '11:00', room: src ? src.room : '', col: src ? classColor(src) : '', body: src ? src.body : '', colTouched: !!src };
+  const sh = makeSheet(`
+    <div class="fhead"><button class="tbtn l" type="button" data-close>Cancelar</button><div class="ft">${ex ? 'Editar clase' : 'Nueva clase'}</div><button class="tbtn strong r" id="clSave" type="button">${ex ? 'Guardar' : 'Añadir'}</button></div>
+    <div class="fbody">
+      <label class="field"><span>Asignatura</span><input class="inp" id="clTitle" maxlength="80" autocomplete="off" enterkeyhint="done" placeholder="Ej. Control Automático"></label>
+      ${subjects.length ? `<div class="sug" id="clSug">${subjects.map((s, i) => `<button type="button" data-s="${i}">${esc(s)}</button>`).join('')}</div>` : ''}
+      <div class="field"><span>${ex ? 'Día' : 'Días (puedes elegir varios)'}</span><div class="seg days" role="group" aria-label="Días">${[1, 2, 3, 4, 5].map(d => `<button type="button" data-d="${d}" aria-label="${DOW_L[d]}">${DOW_S[d]}</button>`).join('')}</div></div>
+      <div class="field two"><label><span>Empieza</span><input class="inp" id="clHs" type="time" step="300"></label><label><span>Termina</span><input class="inp" id="clHe" type="time" step="300"></label></div>
+      <label class="field"><span>Aula (opcional)</span><input class="inp" id="clRoom" maxlength="120" autocomplete="off" enterkeyhint="done" placeholder="Ej. Aula 1.3, Edificio L"></label>
+      <div class="field"><span>Color (si no eliges, se pone uno solo)</span>${swatchesHTML(st.col)}</div>
+      <label class="field"><span>Notas (opcional)</span><textarea class="inp short" id="clBody" rows="3" placeholder="Profesor, grupo, si es teoría o prácticas…"></textarea></label>
+      <p class="err" id="clErr" hidden></p>
+    </div>`, 'page');
+  const f = sh.el, T = $('#clTitle', f), Hs = $('#clHs', f), He = $('#clHe', f), R = $('#clRoom', f), B = $('#clBody', f), save = $('#clSave', f), err = $('#clErr', f);
+  T.value = st.title; Hs.value = st.hs; He.value = st.he; R.value = st.room; B.value = st.body;
+  const sameSubject = () => allClasses().find(c => norm(c.title) === norm(T.value.trim()) && c.id !== id);
+  const upd = () => {
+    if (!st.colTouched) { const o = sameSubject(); st.col = o ? classColor(o) : ''; }
+    $$('.days button', f).forEach(b => b.setAttribute('aria-pressed', String(st.days.includes(+b.dataset.d))));
+    paintSwatches(f, st.col);
+    const okT = HM_RE.test(Hs.value) && HM_RE.test(He.value) && He.value > Hs.value;
+    save.disabled = !T.value.trim() || !st.days.length || !okT;
+    err.hidden = !(HM_RE.test(Hs.value) && HM_RE.test(He.value)) || He.value > Hs.value;
+    err.textContent = 'La hora de fin tiene que ser después de la de inicio.';
+  };
+  [T, Hs, He].forEach(x => x.addEventListener('input', upd));
+  Hs.addEventListener('change', () => {
+    // al mover el inicio, el final se mueve igual (misma duración)
+    if (HM_RE.test(Hs.value) && HM_RE.test(st.hs) && HM_RE.test(He.value)) {
+      const toM = v => { const [a, b] = v.split(':').map(Number); return a * 60 + b; }, dur = toM(He.value) - toM(st.hs);
+      const end = Math.min(23 * 60 + 55, toM(Hs.value) + Math.max(15, dur));
+      He.value = `${pad(Math.floor(end / 60))}:${pad(end % 60)}`;
+    }
+    st.hs = Hs.value; upd();
+  });
+  f.addEventListener('click', e => {
+    const d = e.target.closest('.days button');
+    if (d) { const v = +d.dataset.d; st.days = ex ? [v] : st.days.includes(v) ? st.days.filter(x => x !== v) : [...st.days, v]; upd(); return; }
+    const sw = e.target.closest('.sw-c'); if (sw) { st.col = sw.dataset.color || ''; st.colTouched = true; upd(); return; }
+    const sg = e.target.closest('[data-s]'); if (sg) { T.value = subjects[+sg.dataset.s]; upd(); }
+  });
+  save.addEventListener('click', () => {
+    if (save.disabled || !canWrite()) return;
+    const now = Date.now();
+    const base = { folder: fid, t: 'class', title: T.value.trim().slice(0, 80), hs: Hs.value, he: He.value, room: R.value.replace(/\s+/g, ' ').trim(), body: B.value.trim(), col: st.col || classColor({ title: T.value.trim() }), updated: now };
+    const ids = [];
+    if (ex && S.entries.get(ex.id)) { const e = S.entries.get(ex.id); Object.assign(e, base, { dow: st.days[0] }); saveEntry(e); ids.push(e.id); }
+    else for (const d of st.days.slice().sort()) { const e = cleanEntry(newId(), { ...base, dow: d, created: now, pos: 0 }); S.entries.set(e.id, e); saveEntry(e); ids.push(e.id); }
+    // misma asignatura, mismo color en todas sus clases
+    for (const c of allClasses()) if (!ids.includes(c.id) && norm(c.title) === norm(base.title) && c.col !== base.col) { c.col = base.col; c.updated = now; saveEntry(c); }
+    sh.close(); lastUni = ''; renderFolder(); scheduleRender();
+    toast(ex ? 'Clase guardada' : ids.length > 1 ? `${ids.length} clases añadidas` : 'Clase añadida', 'check');
+  });
+  upd();
+  if (!src) setTimeout(() => { try { T.focus({ preventScroll: true }); } catch (e) {} }, 350);
+}
+
+/* ================= hábitos ================= */
+// Cada hábito es una entrada de una carpeta de tipo «habits».
+// hd = días hechos, 'AAAAMMDD' separados por comas · goal = veces por semana (7 = cada día).
+const HD_RE = /^\d{8}(,\d{8})*$/;
+const dkey = d => `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+const dkeyToDate = k => new Date(+k.slice(0, 4), +k.slice(4, 6) - 1, +k.slice(6, 8));
+const habitSet = e => new Set(e.hd ? e.hd.split(',') : []);
+const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+const mondayOf = d => addDays(d, -((d.getDay() + 6) % 7));
+const HABIT_SUG = ['Gimnasio', 'Leer 20 minutos', 'Estudiar IA', 'Beber 2 litros de agua', 'Dormir 8 horas', 'Repasar apuntes', 'Caminar 30 minutos', 'Sin móvil antes de dormir'];
+function habitStats(e){
+  const set = habitSet(e), goal = e.goal || 7, today = new Date(), tk = dkey(today);
+  let streak = 0, best = 0;
+  if (goal >= 7) {
+    // días seguidos; si hoy aún no está hecho, la racha sigue viva desde ayer
+    let d = set.has(tk) ? today : addDays(today, -1);
+    while (set.has(dkey(d))) { streak++; d = addDays(d, -1); }
+    const sorted = [...set].sort(); let run = 0, prev = null;
+    for (const k of sorted) { const d2 = dkeyToDate(k); run = prev && Math.round((d2 - prev) / 864e5) === 1 ? run + 1 : 1; prev = d2; best = Math.max(best, run); }
+  } else {
+    // semanas seguidas cumpliendo el objetivo; la semana actual cuenta si ya se ha cumplido
+    const weekCount = m => { let n = 0; for (let i = 0; i < 7; i++) if (set.has(dkey(addDays(m, i)))) n++; return n; };
+    let m = mondayOf(today);
+    if (weekCount(m) < goal) m = addDays(m, -7);
+    while (weekCount(m) >= goal) { streak++; m = addDays(m, -7); }
+    if (set.size) {
+      const first = mondayOf(dkeyToDate([...set].sort()[0])); let run = 0;
+      for (let w = first; w <= today; w = addDays(w, 7)) { run = weekCount(w) >= goal ? run + 1 : 0; best = Math.max(best, run); }
+    }
+  }
+  best = Math.max(best, streak);
+  const mon = mondayOf(today); let week = 0;
+  for (let i = 0; i < 7; i++) if (set.has(dkey(addDays(mon, i)))) week++;
+  let month = 0; for (let i = 0; i < 30; i++) if (set.has(dkey(addDays(today, -i)))) month++;
+  const monthPct = Math.round(month / (goal >= 7 ? 30 : Math.max(1, goal * 30 / 7)) * 100);
+  return { set, done: set.has(tk), streak, best, week, goal, total: set.size, monthPct: Math.min(100, monthPct), unit: goal >= 7 ? ['día', 'días'] : ['semana', 'semanas'] };
+}
+function habitHTML(e){
+  const s = habitStats(e), k = colorOf(e.col) ? e.col : 'menta', tv = tintVars(k);
+  const mon = mondayOf(new Date()), tk = dkey(new Date());
+  const dots = [0, 1, 2, 3, 4, 5, 6].map(i => {
+    const d = addDays(mon, i), key = dkey(d), fut = key > tk;
+    return `<button type="button" class="hb-d${s.set.has(key) ? ' on' : ''}${key === tk ? ' today' : ''}" data-day="${key}"${fut ? ' disabled' : ''} aria-label="${esc(DOW_L[d.getDay()])} ${d.getDate()}${s.set.has(key) ? ', hecho' : ''}"><small>${DOW_S[d.getDay()]}</small><i>${svg('check')}</i></button>`;
+  }).join('');
+  const sub = s.goal >= 7
+    ? (s.streak ? `${svg('flame')}<span>${s.streak === 1 ? '1 día de racha' : s.streak + ' días seguidos'}</span>` : '<span>Empieza hoy tu racha</span>')
+    : `<span>${s.week} de ${s.goal} esta semana</span>${s.streak ? ` · ${svg('flame')}<span>${s.streak === 1 ? '1 semana' : s.streak + ' semanas seguidas'}</span>` : ''}`;
+  return `<div class="cell" data-id="${esc(e.id)}"><div class="wig"><div class="habit tint${s.done ? ' done' : ''}" style="${tv}" role="button" tabindex="0" aria-label="${esc(e.title)}${s.done ? ', hecho hoy' : ''}">
+    <span class="hb-top"><span class="hb-ck" data-today="1">${svg('check')}</span><span class="hb-t"><b>${esc(e.title || 'Hábito')}</b><small>${sub}</small></span></span>
+    <span class="hb-week">${dots}</span>
+  </div><button class="badge" type="button" aria-label="Eliminar ${esc(e.title)}">${svg('minus')}</button></div></div>`;
+}
+function toggleHabitDay(id, key, cell){
+  if (!canWrite()) return;
+  const e = S.entries.get(id); if (!e) return;
+  const set = habitSet(e), on = !set.has(key);
+  if (on) set.add(key); else set.delete(key);
+  e.hd = [...set].sort().join(','); e.updated = Date.now();
+  saveEntry(e);
+  const card = cell && $('.habit', cell);
+  if (card && on && key === dkey(new Date())) { card.classList.remove('pop'); void card.offsetWidth; card.classList.add('pop'); }
+  renderFolder(); scheduleRender();
+  if (on && key === dkey(new Date())) { const s = habitStats(e); if (s.goal >= 7 && [3, 7, 14, 21, 30, 50, 100, 365].includes(s.streak)) toast(`${s.streak} días seguidos`, 'flame'); }
+}
+function habitsDoneToday(fid){
+  const list = folderEntries(fid), tk = dkey(new Date());
+  return { n: list.length, done: list.filter(e => habitSet(e).has(tk)).length };
+}
+function openHabitForm(id = null){
+  if (!canWrite()) return;
+  const fid = S.folder, ex = id ? S.entries.get(id) : null;
+  if (!fid || (id && !ex)) return;
+  const st = { title: ex ? ex.title : '', goal: ex ? ex.goal || 7 : 7, col: ex ? ex.col || 'menta' : COLORS[folderEntries(fid).length % COLORS.length].k };
+  const sh = makeSheet(`
+    <div class="fhead"><button class="tbtn l" type="button" data-close>Cancelar</button><div class="ft">${ex ? 'Editar hábito' : 'Nuevo hábito'}</div><button class="tbtn strong r" id="hbSave" type="button">${ex ? 'Guardar' : 'Añadir'}</button></div>
+    <div class="fbody">
+      <label class="field"><span>Hábito</span><input class="inp" id="hbTitle" maxlength="60" autocomplete="off" enterkeyhint="done" placeholder="Ej. Gimnasio"></label>
+      ${ex ? '' : `<div class="sug">${HABIT_SUG.map((s, i) => `<button type="button" data-s="${i}">${esc(s)}</button>`).join('')}</div>`}
+      <div class="field"><span>Cada cuánto</span><div class="seg"><button type="button" data-g="d">Cada día</button><button type="button" data-g="w">Unas veces por semana</button></div></div>
+      <div class="field" id="hbWeek"><span>Veces por semana</span><div class="stepper"><button type="button" data-step="-1" aria-label="Menos">${svg('minus')}</button><b id="hbGoal"></b><button type="button" data-step="1" aria-label="Más">${svg('plus')}</button></div><p class="seg-note">La racha cuenta las semanas seguidas en las que llegas a ese número.</p></div>
+      <div class="field"><span>Color</span>${swatchesHTML(st.col).replace('class="sw-c none"', 'class="sw-c none" hidden')}</div>
+      ${ex ? '<button class="dbtn" type="button" id="hbDel">Eliminar hábito</button>' : ''}
+    </div>`, 'page');
+  const f = sh.el, T = $('#hbTitle', f), save = $('#hbSave', f);
+  T.value = st.title;
+  const upd = () => {
+    $$('[data-g]', f).forEach(b => b.setAttribute('aria-pressed', String((b.dataset.g === 'd') === (st.goal >= 7))));
+    $('#hbWeek', f).hidden = st.goal >= 7;
+    $('#hbGoal', f).textContent = st.goal >= 7 ? '' : st.goal;
+    paintSwatches(f, st.col);
+    save.disabled = !T.value.trim();
+  };
+  T.addEventListener('input', upd);
+  f.addEventListener('click', e => {
+    const g = e.target.closest('[data-g]'); if (g) { st.goal = g.dataset.g === 'd' ? 7 : 3; upd(); return; }
+    const sp = e.target.closest('[data-step]'); if (sp) { st.goal = Math.max(1, Math.min(6, st.goal + +sp.dataset.step)); upd(); return; }
+    const sw = e.target.closest('.sw-c'); if (sw && sw.dataset.color) { st.col = sw.dataset.color; upd(); return; }
+    const sg = e.target.closest('[data-s]'); if (sg) { T.value = HABIT_SUG[+sg.dataset.s]; upd(); return; }
+    if (e.target.closest('#hbDel')) { sh.close(); setTimeout(() => askDeleteEntry(id), 200); }
+  });
+  save.addEventListener('click', () => {
+    const title = T.value.replace(/\s+/g, ' ').trim(); if (!title || !canWrite()) return;
+    const now = Date.now();
+    const e = ex && S.entries.get(ex.id) ? S.entries.get(ex.id) : cleanEntry(newId(), { folder: fid, created: now, pos: nextPos(fid) });
+    e.title = title.slice(0, 60); e.goal = st.goal; e.col = st.col; e.updated = now;
+    S.entries.set(e.id, e); saveEntry(e);
+    sh.close(); renderFolder(); scheduleRender();
+    if (!ex) toast('Hábito añadido', 'check');
+  });
+  upd();
+  if (!ex) setTimeout(() => { try { T.focus({ preventScroll: true }); } catch (x) {} }, 350);
+}
+// Estadísticas y calendario de las últimas 18 semanas (se puede tocar un día para corregirlo).
+function habitSheet(id){
+  const e = S.entries.get(id); if (!e) return;
+  const k = colorOf(e.col) ? e.col : 'menta';
+  const sh = makeSheet(`<div class="grab"></div><div class="sh-head"><span${tintAttr(k, 'shic')}>${svg('flame')}</span><div class="sh-ht"><div class="sh-title" id="hsT"></div><div class="sh-sub" id="hsS"></div></div></div>
+    <div class="fbody" style="${tintVars(k)}"><div id="hsBody"></div>
+      <div class="btnrow" style="margin-top:14px"><button type="button" id="hsEdit">${svg('pencil')}Editar</button><button type="button" id="hsDel">${svg('trash-2')}Eliminar</button></div></div>`, 'tall');
+  const paint = () => {
+    const x = S.entries.get(id); if (!x) { sh.close(); return; }
+    const s = habitStats(x), today = new Date(), tk = dkey(today);
+    $('#hsT', sh.el).textContent = x.title;
+    $('#hsS', sh.el).textContent = s.goal >= 7 ? 'Cada día' : `${s.goal} veces por semana`;
+    const W = 18, start = addDays(mondayOf(today), -7 * (W - 1));
+    let grid = '';
+    for (let r = 0; r < 7; r++) for (let c = 0; c < W; c++) {
+      const d = addDays(start, c * 7 + r), key = dkey(d), fut = key > tk;
+      grid += `<button type="button" class="hm${s.set.has(key) ? ' on' : ''}${key === tk ? ' today' : ''}" data-day="${key}" style="grid-row:${r + 1};grid-column:${c + 1}"${fut ? ' disabled' : ''} aria-label="${d.getDate()} ${MONTHS_S[d.getMonth()]}"></button>`;
+    }
+    const months = []; for (let c = 0; c < W; c++) { const d = addDays(start, c * 7); if (c === 0 || d.getDate() <= 7) months.push(`<span style="grid-column:${c + 1}">${MONTHS_S[d.getMonth()]}</span>`); }
+    $('#hsBody', sh.el).innerHTML = `
+      <div class="hs-stats"><div><b>${s.streak}</b><small>Racha (${s.unit[s.streak === 1 ? 0 : 1]})</small></div><div><b>${s.best}</b><small>Mejor racha</small></div><div><b>${s.monthPct} %</b><small>Últimos 30 días</small></div><div><b>${s.total}</b><small>Veces en total</small></div></div>
+      <div class="hm-wrap"><div class="hm-months">${months.join('')}</div><div class="hm-grid">${grid}</div><div class="hm-days"><span>L</span><span></span><span>X</span><span></span><span>V</span><span></span><span>D</span></div></div>
+      <p class="foot">Toca un día para marcarlo o desmarcarlo (por si se te olvidó).</p>`;
+  };
+  paint();
+  sh.el.addEventListener('click', ev => {
+    const d = ev.target.closest('.hm[data-day]'); if (d && !d.disabled) { toggleHabitDay(id, d.dataset.day, null); paint(); }
+  });
+  $('#hsEdit', sh.el).addEventListener('click', () => { sh.close(); setTimeout(() => openHabitForm(id), 200); });
+  $('#hsDel', sh.el).addEventListener('click', () => { sh.close(); setTimeout(() => askDeleteEntry(id), 200); });
+}
+
+/* ================= atajos de Siri ================= */
+// La app Atajos del iPhone habla directamente con el servidor (op 'atajo') usando una clave propia.
+// Esa clave se crea aquí (necesita la sesión) y se guarda solo en este dispositivo para poder copiarla.
+const K_ATAJO = 'miespacio.atajo.v1';
+const SIRI = [
+  { id: 'gasto', say: 'Apunta un gasto', icon: 'wallet', what: 'Te pregunta cuánto y en qué, y lo apunta en Finanzas con la fecha de hoy. Te dice lo que llevas este mes.',
+    asks: [['¿Cuánto?', 'Número'], ['¿En qué?', 'Texto']], fields: [['importe', 'la respuesta a «¿Cuánto?»'], ['concepto', 'la respuesta a «¿En qué?»']] },
+  { id: 'habito', say: 'Marca un hábito', icon: 'flame', what: 'Te pregunta qué hábito y lo marca como hecho hoy. Te dice tu racha.',
+    asks: [['¿Qué hábito?', 'Texto']], fields: [['nombre', 'la respuesta a «¿Qué hábito?»']],
+    tip: 'Truco: haz uno por hábito sin pregunta (en «nombre» escribe Gimnasio) y llámalo «Marca gimnasio».' },
+  { id: 'recordatorio', say: 'Añade a recordatorios', icon: 'list-checks', what: 'Te pregunta qué añadir y lo pone arriba de tu lista de Recordatorios.',
+    asks: [['¿Qué añado?', 'Texto']], fields: [['texto', 'la respuesta a «¿Qué añado?»']] },
+  { id: 'nota', say: 'Apunta una nota', icon: 'notepad-pen', what: 'Dictas la nota y se guarda en tu carpeta Notas.',
+    asks: [['Dicta la nota', 'Texto']], fields: [['texto', 'la respuesta a «Dicta la nota»']] },
+  { id: 'hoy', say: 'Qué tengo hoy', icon: 'calendar-days', what: 'Siri te lee lo que te queda hoy: eventos de Google Calendar y clases del horario.',
+    asks: [], fields: [] },
+];
+function siriRecipe(r){
+  const steps = [`Abre la app <b>Atajos</b>, pulsa <b>+</b> y arriba ponle de nombre <b>${esc(r.say)}</b> (es lo que le dirás a Siri).`];
+  r.asks.forEach(([q, type]) => steps.push(`Añade la acción <b>Pedir entrada</b>. Pregunta: <b>${esc(q)}</b>. Tipo de entrada: <b>${type}</b>.`));
+  const rows = [['op', 'atajo'], ['clave', 'tu clave (cópiala arriba)'], ['accion', r.id], ...r.fields.map(([k, v]) => [k, v])];
+  steps.push(`Añade <b>Obtener contenido de URL</b>. En la URL pega la <b>dirección</b> de arriba. Toca la flecha para ver más: <b>Método: POST</b> y <b>Cuerpo de solicitud: JSON</b>. Añade estos campos, todos de tipo <b>Texto</b>:<span class="kv">${rows.map(([k, v]) => `<span><code>${esc(k)}</code><i>${esc(v)}</i></span>`).join('')}</span>${r.fields.length ? 'Para poner una respuesta, toca el valor del campo y elige la variable <b>Entrada proporcionada</b> de esa pregunta.' : ''}`);
+  steps.push('Añade <b>Mostrar resultado</b> y elige <b>Contenido de URL</b>. Cuando lo uses con Siri, te lo dirá en voz alta.');
+  return `<details class="siri"><summary><span class="shic">${svg(r.icon)}</span><span class="al">«Oye Siri, ${esc(r.say.charAt(0).toLowerCase() + r.say.slice(1))}»<small>${esc(r.what)}</small></span>${svg('chevron-right')}</summary><ol class="steps">${steps.map(s => `<li>${s}</li>`).join('')}</ol>${r.tip ? `<p class="foot">${esc(r.tip)}</p>` : ''}</details>`;
+}
+function openSiri(){
+  const sh = makeSheet(`<div class="grab"></div><div class="sh-head"><span class="shic">${svg('mic')}</span><div class="sh-ht"><div class="sh-title">Atajos de Siri</div><div class="sh-sub">Apunta cosas hablando, sin abrir la app</div></div></div>
+    <div class="fbody"><div id="siTop"></div>
+      <p class="gl">Atajos</p>
+      <p class="foot">Créalos una vez en la app Atajos del iPhone (unos 2 minutos cada uno). Toca uno para ver los pasos.</p>
+      ${SIRI.map(siriRecipe).join('')}
+      <p class="foot" style="margin-top:14px">Si tienes varias secciones del mismo tipo (por ejemplo dos listas), añade el campo <code>carpeta</code> con el nombre de la que quieras. Siri tarda 1–3 segundos en responder y necesita internet.</p>
+    </div>`, 'page');
+  const top = $('#siTop', sh.el);
+  const st = { busy: false, activo: null, err: '' };
+  const paint = () => {
+    const key = ls.get(K_ATAJO) || '', url = serverUrl();
+    if (P.db !== SS || !SS.token()) { top.innerHTML = '<div class="u-msg">Los atajos funcionan con la versión de la app conectada a Google y con la sesión iniciada.</div>'; return; }
+    if (st.err) { top.innerHTML = `<div class="u-msg">${esc(st.err)}</div>`; return; }
+    if (key && st.activo !== false) {
+      top.innerHTML = `<p class="gl">Lo que tienes que copiar</p><div class="group">
+        <button class="row" type="button" data-copy="url">${svg('link')}<span class="al" style="flex:1;min-width:0">Dirección<small style="display:block;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(url)}</small></span>${svg('copy')}</button>
+        <button class="row" type="button" data-copy="key">${svg('key-round')}<span class="al" style="flex:1;min-width:0">Tu clave de atajos<small style="display:block;color:var(--muted);font-size:13px">${esc(key.slice(0, 4))}••••••••${esc(key.slice(-4))}</small></span>${svg('copy')}</button></div>
+        <p class="foot">La clave solo sirve para añadir cosas y para «¿qué tengo hoy?»: con ella no se pueden ver tus notas ni borrar nada. No la compartas.</p>
+        <div class="group"><button class="row" type="button" data-k="crear">${svg('refresh-cw')}Cambiar la clave<span class="rv">Los atajos viejos dejan de funcionar</span></button><button class="row" type="button" data-k="quitar" style="color:var(--danger)">${svg('x')}Desactivar los atajos</button></div>`;
+    } else {
+      top.innerHTML = `<div class="u-msg">${st.activo ? 'Ya creaste una clave en otro dispositivo. Puedes crear una nueva aquí (la anterior dejará de funcionar) o copiarla desde ese dispositivo.' : 'Primero crea tu clave de atajos. Es distinta de tu contraseña y solo sirve para los atajos.'}<br><button class="pill" type="button" data-k="crear"${st.busy ? ' disabled' : ''}>${st.busy ? 'Creando…' : st.activo ? 'Crear una clave nueva' : 'Crear mi clave'}</button></div>`;
+    }
+  };
+  const call = async accion => {
+    const quiet = accion === 'estado';
+    if (!quiet) { st.busy = true; paint(); }
+    try {
+      const r = await SS.request({ op: 'atajos', token: SS.token(), accion });
+      if (r && r.ok) { st.activo = r.activo; st.err = ''; if (r.clave) ls.set(K_ATAJO, r.clave); if (!r.activo) ls.set(K_ATAJO, ''); return r; }
+      if (r && r.error === 'auth') { sh.close(); SS.onAuthLost(); return null; }
+      st.err = r && r.error === 'op' ? 'Falta un paso: actualiza el servidor (Codigo.gs) para usar los atajos.' : 'No se pudo conectar con el servidor. Inténtalo otra vez.';
+    } catch (e) { st.err = 'Sin conexión con el servidor. Inténtalo con internet.'; }
+    finally { st.busy = false; paint(); }
+    return null;
+  };
+  sh.el.addEventListener('click', async e => {
+    const c = e.target.closest('[data-copy]');
+    if (c) { copyAndTell(c.dataset.copy === 'url' ? serverUrl() : ls.get(K_ATAJO) || '', c.dataset.copy === 'url' ? 'Dirección copiada' : 'Clave copiada'); return; }
+    const k = e.target.closest('[data-k]'); if (!k || st.busy) return;
+    if (k.dataset.k === 'quitar') {
+      if (!await confirmDialog({ title: '¿Desactivar los atajos?', message: 'Los atajos que hayas creado dejarán de funcionar hasta que crees una clave nueva.', ok: 'Desactivar' })) return;
+      if (await call('quitar')) toast('Atajos desactivados', 'check');
+    } else {
+      if (ls.get(K_ATAJO) && !await confirmDialog({ title: '¿Cambiar la clave?', message: 'Tendrás que pegar la nueva en cada atajo.', ok: 'Cambiar', danger: false })) return;
+      if (await call('crear')) toast('Clave creada · cópiala en tus atajos', 'check');
+    }
+  });
+  paint();
+  if (P.db === SS && SS.token()) call('estado');
+}
+
 /* ================= configuración y copias ================= */
 function counts(){
   let notes = 0, snips = 0, todos = 0, moves = 0;
-  for (const e of S.entries.values()) { const it = S.home.items[e.folder]; if (!it) continue; if (it.kind === 'notes') notes++; else if (it.kind === 'copy') snips++; else if (it.kind === 'list') todos++; else if (it.kind === 'money' && !e.rep) moves++; }
-  return { items: S.home.order.length, notes, snips, todos, moves };
+  for (const e of S.entries.values()) { const it = S.home.items[e.folder]; if (!it) continue; if (it.kind === 'notes' || (it.kind === 'uni' && !e.t)) notes++; else if (it.kind === 'copy') snips++; else if (it.kind === 'list') todos++; else if (it.kind === 'money' && !e.rep) moves++; }
+  return { items: Object.keys(S.home.items).length, notes, snips, todos, moves };
 }
 function openSettings(){
   const c = counts();
@@ -2683,9 +4163,14 @@ function openSettings(){
       <div class="group"><div class="row"><span class="sdot" id="stDot"></span><span id="stText"></span></div><div class="row">Cambios<span class="rv" id="stSave"></span></div></div>
       <p class="foot" id="stFoot"></p>
       ${standalone ? `<div class="group" id="stSheets">${P.db === SS ? `<button class="row" type="button" id="stSync">${svg('rotate-ccw')}Sincronizar ahora</button><button class="row" type="button" id="stLogin" hidden>${svg('key-round')}Entrar con la contraseña</button><button class="row" type="button" id="stLogout">${svg('lock')}Salir de este dispositivo</button>` : `<button class="row" type="button" id="stConnect">${svg('cloud')}Conectar con Google Sheets</button>`}</div>` : ''}
+      ${P.db === SS ? `<p class="gl">Siri</p><div class="group"><button class="row" type="button" id="stSiri">${svg('mic')}Atajos de Siri<span class="rv">${svg('chevron-right')}</span></button></div>` : ''}
       <p class="gl">Contenido</p>
       <div class="group"><div class="row">Elementos en el inicio<span class="rv">${c.items}</span></div><div class="row">Notas<span class="rv">${c.notes}</span></div><div class="row">Textos rápidos<span class="rv">${c.snips}</span></div><div class="row">Cosas en listas<span class="rv">${c.todos}</span></div><div class="row">Movimientos de finanzas<span class="rv">${c.moves}</span></div></div>
       <div class="group"><button class="row" type="button" id="stReorder">${svg('move')}Reorganizar inicio</button></div>
+      <p class="gl">Vista del inicio</p>
+      <div class="seg" id="stView" style="margin-bottom:18px"><button type="button" data-v="grid" aria-pressed="${View.get() === 'grid'}">Cuadrados</button><button type="button" data-v="rows" aria-pressed="${View.get() === 'rows'}">Rayas</button></div>
+      <p class="gl">Estilo de color</p>
+      <div class="cstyles" id="stCStyle">${CSTYLES.map(([k, l]) => `<button type="button" data-cs="${k}" aria-pressed="${CStyle.get() === k}"><span class="csp ${k}">${svg('graduation-cap')}</span>${l}</button>`).join('')}</div>
       <p class="gl">Copia de seguridad</p>
       <div class="group"><button class="row" type="button" id="stExport">${svg('download')}Copiar copia de seguridad</button><button class="row" type="button" id="stImport">${svg('upload')}Restaurar desde una copia</button></div>
       <p class="foot">La copia es un texto con todo tu contenido. Pégalo en una nota, un correo o un archivo para guardarlo; para recuperarlo, pégalo en «Restaurar».</p>
@@ -2721,7 +4206,10 @@ function openSettings(){
   on('#stSync', () => { SS.authFailed = false; SS.sync(); toast('Sincronizando…', 'rotate-ccw'); });
   on('#stLogin', () => { sh.close(); setTimeout(() => showLogin({}), 150); });
   on('#stLogout', () => { sh.close(); setTimeout(logoutSheets, 150); });
+  on('#stSiri', () => { sh.close(); setTimeout(openSiri, 150); });
   on('#stConnect', () => { sh.close(); setTimeout(() => showLogin({}), 150); });
+  $('#stView', sh.el).addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (!b) return; View.set(b.dataset.v); $$('#stView button', sh.el).forEach(x => x.setAttribute('aria-pressed', String(x === b))); });
+  $('#stCStyle', sh.el).addEventListener('click', e => { const b = e.target.closest('[data-cs]'); if (!b) return; CStyle.set(b.dataset.cs); $$('#stCStyle button', sh.el).forEach(x => x.setAttribute('aria-pressed', String(x === b))); });
   $('#stReorder', sh.el).addEventListener('click', () => { sh.close(); setTimeout(() => startEditing('home'), 150); });
   $('#stExport', sh.el).addEventListener('click', () => {
     const json = JSON.stringify({ ...snapshotAll(), exported: new Date().toISOString() });
@@ -2803,7 +4291,7 @@ function longPress(container, sel, onLong, disabled, deep = false){
   });
 }
 
-function sortable(container, { scroller, active, onDrop }){
+function sortable(container, { scroller, active, onDrop, canMerge = null, onMerge = null }){
   let st = null;
   const cells = () => [...container.children].filter(c => c.classList.contains('cell'));
   const cellAt = target => { const c = target.closest('.cell'); return c && c.parentElement === container ? c : null; };
@@ -2825,15 +4313,35 @@ function sortable(container, { scroller, active, onDrop }){
     place();
     st.raf = requestAnimationFrame(tick);
   }
+  function clearHover(){
+    if (!st) return;
+    clearTimeout(st.hoverT); st.hover = null; st.hoverMode = '';
+    if (st.merge) { const t = $('.tile', st.merge); if (t) t.classList.remove('drop-on'); st.merge = null; }
+  }
   function place(){
-    st.ghost.style.transform = `translate3d(${st.x - st.ox}px, ${st.y - st.oy}px, 0) scale(1.05)`;
+    st.ghost.style.transform = `translate3d(${st.x - st.ox}px, ${st.y - st.oy}px, 0) scale(${st.merge ? .9 : 1.05})`;
     const cr = container.getBoundingClientRect();
     const px = st.x - cr.left, py = st.y - cr.top;
     const list = cells();
-    for (const c of list) {
-      if (c === st.cell) continue;
-      if (px >= c.offsetLeft && px <= c.offsetLeft + c.offsetWidth && py >= c.offsetTop && py <= c.offsetTop + c.offsetHeight) { moveTo(c, list); break; }
+    let c = null;
+    for (const x of list) {
+      if (x === st.cell) continue;
+      if (px >= x.offsetLeft && px <= x.offsetLeft + x.offsetWidth && py >= x.offsetTop && py <= x.offsetTop + x.offsetHeight) { c = x; break; }
     }
+    if (!canMerge) { if (c) moveTo(c, list); return; }
+    // Con carpetas: en el centro de otra tarjeta (quieto un momento) se agrupan; por el borde, se reordena.
+    if (!c) { clearHover(); return; }
+    const w = c.offsetWidth, h = c.offsetHeight;
+    const center = px > c.offsetLeft + w * .2 && px < c.offsetLeft + w * .8 && py > c.offsetTop + h * .18 && py < c.offsetTop + h * .82;
+    const mode = center && canMerge(st.cell.dataset.id, c.dataset.id) ? 'm' : 'r';
+    if (st.hover === c && st.hoverMode === mode) return;
+    clearHover();
+    st.hover = c; st.hoverMode = mode;
+    st.hoverT = setTimeout(() => {
+      if (!st || st.hover !== c) return;
+      if (mode === 'm') { st.merge = c; const t = $('.tile', c); if (t) t.classList.add('drop-on'); place(); }
+      else { st.hover = null; st.hoverMode = ''; moveTo(c, cells()); }
+    }, mode === 'm' ? 380 : 150);
   }
   function moveTo(target, list){
     const from = list.indexOf(st.cell), to = list.indexOf(target);
@@ -2865,18 +4373,23 @@ function sortable(container, { scroller, active, onDrop }){
     clearTimeout(s.timer);
     if (!s.on) return;
     cancelAnimationFrame(s.raf);
+    clearTimeout(s.hoverT);
     suppressClickUntil = Date.now() + 400;
-    const r = s.cell.getBoundingClientRect();
-    s.ghost.style.transition = 'transform .26s cubic-bezier(.32,.72,0,1)';
-    s.ghost.style.transform = `translate3d(${r.left}px, ${r.top}px, 0) scale(1)`;
+    const into = s.merge ? s.merge.dataset.id : null;
+    const r = (s.merge || s.cell).getBoundingClientRect();
+    s.ghost.style.transition = 'transform .26s cubic-bezier(.32,.72,0,1), opacity .26s';
+    s.ghost.style.transform = `translate3d(${r.left}px, ${r.top}px, 0) scale(${into ? .4 : 1})`;
+    if (into) s.ghost.style.opacity = '0';
     const after = cells().map(c => c.dataset.id);
     setTimeout(() => {
       s.ghost.remove();
       s.cell.classList.remove('drag-src');
+      if (s.merge) { const t = $('.tile', s.merge); if (t) t.classList.remove('drop-on'); }
       for (const c of cells()) { c.style.transition = ''; c.style.transform = ''; }
       Drag.active = false;
       if (after.join('|') !== s.before) onDrop(after, s.cell.dataset.id);
-      lastHome = ''; lastFolder = '';
+      if (into && onMerge) onMerge(s.cell.dataset.id, into);
+      lastHome = ''; lastFolder = ''; lastGroup = '';
       render();
     }, 270);
   }
@@ -2917,18 +4430,22 @@ function bind(){
 
   // inicio
   $('#hAdd').addEventListener('click', () => { if (canWrite()) createMenu(); });
+  $('#hView').addEventListener('click', () => View.toggle());
   $('#hDone').addEventListener('click', stopEditing);
-  $('#hFolder').addEventListener('click', () => openItemForm({ kind: 'notes' }));
+  $('#hFolder').addEventListener('click', () => { if (canWrite()) openGroupForm(); });
   $('#hSettings').addEventListener('click', openSettings);
   const hGrid = $('#hGrid');
-  hGrid.addEventListener('click', e => {
+  const tapItem = (e, scope) => {
     const cell = e.target.closest('.cell'); if (!cell) return;
     const id = cell.dataset.id, it = S.home.items[id]; if (!it) return;
     if (e.target.closest('.badge')) { e.preventDefault(); askDeleteItem(id); return; }
-    if (S.editing === 'home') { e.preventDefault(); return; }
+    if (S.editing === scope) { e.preventDefault(); return; }
     if (it.kind === 'link') { if (!safeUrl(it.url)) { e.preventDefault(); openItemForm({ id }); } return; }
+    if (it.kind === 'group') { openGroup(id); return; }
+    if (it.kind === 'cal') { openAgenda(); return; }
     openFolder(id);
-  });
+  };
+  hGrid.addEventListener('click', e => tapItem(e, 'home'));
   $('#hScroll').addEventListener('click', e => { if (S.editing === 'home' && !e.target.closest('.cell')) stopEditing(); });
   longPress(hGrid, '.tile', id => itemActions(id), () => S.editing === 'home');
   sortable(hGrid, { scroller: $('#hScroll'), active: () => S.editing === 'home', onDrop: order => {
@@ -2936,7 +4453,26 @@ function bind(){
     const known = order.filter(id => S.home.items[id]);
     S.home.order = known.concat(S.home.order.filter(id => !known.includes(id)));
     saveHome();
+  }, canMerge: (a, b) => groupable(S.home.items[a]) && (groupable(S.home.items[b]) || (S.home.items[b] && S.home.items[b].kind === 'group')), onMerge: mergeOnDrop });
+
+  // carpeta que agrupa (se abre encima del inicio)
+  const gGrid = $('#gGrid');
+  $('#grpBd').addEventListener('click', () => { if (S.editing === 'grp') stopEditing(); else closeGroup(); });
+  $('#grp').addEventListener('click', e => { if (e.target === $('#grp') || e.target.classList.contains('grp-in')) { if (S.editing === 'grp') stopEditing(); else closeGroup(); } });
+  $('#grpName').addEventListener('click', () => { if (G.id && S.editing !== 'grp') openGroupForm({ id: G.id }); });
+  $('#grpDone').addEventListener('click', stopEditing);
+  gGrid.addEventListener('click', e => tapItem(e, 'grp'));
+  longPress(gGrid, '.tile', id => itemActions(id), () => S.editing === 'grp');
+  sortable(gGrid, { scroller: $('#grpPanel'), active: () => S.editing === 'grp', onDrop: order => {
+    if (!canWrite()) return;
+    const g = S.home.items[G.id]; if (!g) return;
+    const known = order.filter(id => g.children.includes(id));
+    g.children = known.concat(g.children.filter(id => !known.includes(id)));
+    saveHome();
   }});
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && G.id && !stack.length && !document.querySelector('.dialog')) { if (S.editing === 'grp') stopEditing(); else closeGroup(); } });
+  bindUni();
+  setInterval(() => { if (Object.values(S.home.items).some(i => i.kind === 'cal')) { lastHome = ''; scheduleRender(); } }, 60000);
 
   // carpeta
   $('#fBack').addEventListener('click', closeFolder);
@@ -2944,6 +4480,8 @@ function bind(){
   $('#fAdd').addEventListener('click', () => {
     const it = S.home.items[S.folder]; if (!it) return;
     if (it.kind === 'notes') newNote();
+    else if (it.kind === 'uni') uniAddMenu();
+    else if (it.kind === 'habits') openHabitForm();
     else if (it.kind === 'list') focusNewTodo();
     else if (it.kind === 'money') openMoneyForm({ focus: true });
     else openSnipForm();
@@ -2951,18 +4489,24 @@ function bind(){
   const fGrid = $('#fGrid');
   fGrid.addEventListener('click', e => {
     const act = e.target.closest('[data-act]');
-    if (act) { if (act.dataset.act === 'newNote') newNote(); else if (act.dataset.act === 'newSnip') openSnipForm(); return; }
+    if (act) { if (act.dataset.act === 'newNote') newNote(); else if (act.dataset.act === 'newSnip') openSnipForm(); else if (act.dataset.act === 'newHabit') openHabitForm(); return; }
     const cell = e.target.closest('.cell'); if (!cell) return;
     const id = cell.dataset.id;
     if (e.target.closest('.badge')) { askDeleteEntry(id); return; }
     if (S.editing === S.folder) return;
     const it = S.home.items[S.folder]; if (!it) return;
-    if (it.kind === 'notes') Editor.open(id);
+    if (it.kind === 'notes' || it.kind === 'uni') Editor.open(id);
+    else if (it.kind === 'habits') {
+      const d = e.target.closest('[data-day]'), ck = e.target.closest('[data-today]');
+      if (d) { if (!d.disabled) toggleHabitDay(id, d.dataset.day, cell); }
+      else if (ck) toggleHabitDay(id, dkey(new Date()), cell);
+      else habitSheet(id);
+    }
     else if (it.kind === 'list') toggleTodo(id, cell);
     else if (it.kind === 'copy') copySnip(id, cell);
   });
   $('#fScroll').addEventListener('click', e => { if (S.editing && S.editing === S.folder && !e.target.closest('.cell')) stopEditing(); });
-  longPress(fGrid, '.note, .snip, .todo', id => entryActions(id), () => S.editing === S.folder);
+  longPress(fGrid, '.note, .snip, .todo, .habit', id => entryActions(id), () => S.editing === S.folder);
   sortable(fGrid, { scroller: $('#fScroll'), active: () => !!S.folder && S.editing === S.folder, onDrop: onSnipDrop });
   const q = $('#fQuery');
   q.addEventListener('input', () => { S.query = q.value; $('#fClear').hidden = !q.value; renderFolder(); });
@@ -3008,6 +4552,7 @@ function boot(){
   if (sheetsWanted()) { SS.load(); const v = SS.snapshot(); if (v.home) snap = v; }
   else snap = ls.get(K_CACHE) || ls.get(K_LOCAL);
   if (snap && snap.home) loadSnapshot(snap);
+  Cal.init();
   bind();
   render();
   connect();

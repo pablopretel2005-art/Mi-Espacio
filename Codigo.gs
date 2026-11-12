@@ -7,6 +7,10 @@
  * Todo se hace desde el menú «Mi espacio» de la hoja (no con el botón Ejecutar del editor):
  *   1. Preparar la hoja
  *   2. Poner o cambiar la contraseña
+ *   3. Conectar Google Calendar (da permiso para LEER tu calendario: widget de hoy y exámenes)
+ *
+ * Atajos de Siri: la app crea una clave aparte (Configuración → Atajos de Siri) que solo sirve
+ * para añadir gastos, hábitos, recordatorios y notas, y para preguntar «¿qué tengo hoy?».
  *
  * La contraseña no se guarda tal cual: solo una «huella» con sal en las propiedades del script.
  *
@@ -31,10 +35,12 @@ function onOpen() {
   SpreadsheetApp.getUi().createMenu('Mi espacio')
     .addItem('1. Preparar la hoja', 'prepararHoja')
     .addItem('2. Poner o cambiar la contraseña', 'ponerContrasena')
+    .addItem('3. Conectar Google Calendar', 'conectarCalendario')
     .addSeparator()
     .addItem('Ver dispositivos conectados', 'verSesiones')
     .addItem('Cerrar todas las sesiones', 'cerrarSesiones')
     .addItem('Limpiar borrados antiguos', 'limpiarBorrados')
+    .addItem('Desactivar atajos de Siri', 'desactivarAtajos')
     .addToUi();
 }
 
@@ -114,6 +120,19 @@ function limpiarBorrados() {
   SpreadsheetApp.getUi().alert(n ? 'Se han quitado ' + n + ' filas antiguas.' : 'No había nada que limpiar.');
 }
 
+// Pide el permiso de Google Calendar (la primera vez sale la ventana de autorización)
+// y comprueba qué calendarios ve la app.
+function conectarCalendario() {
+  const ui = SpreadsheetApp.getUi();
+  const cals = calendarios_();
+  const uni = buscarCalendario_(cals, 'Universidad');
+  ui.alert('Google Calendar conectado',
+    'La app puede leer ' + cals.length + ' calendarios:\n' + cals.map(c => '• ' + c.getName()).join('\n') + '\n\n' +
+    (uni ? 'Para Universidad usaré «' + uni.getName() + '».' : 'No hay ninguno llamado «Universidad»: podrás elegir otro desde la app.') +
+    '\n\nÚltimo paso: Implementar > Gestionar implementaciones > lápiz > Versión: Nueva versión > Implementar.',
+    ui.ButtonSet.OK);
+}
+
 /* ================= aplicación web ================= */
 
 function doGet() {
@@ -127,10 +146,13 @@ function doPost(e) {
   try {
     if (req.op === 'ping') return salida_({ ok: true, now: Date.now(), configurado: !!PropertiesService.getScriptProperties().getProperty('PW') });
     if (req.op === 'login') return salida_(login_(req));
+    if (req.op === 'atajo') { try { return texto_(atajo_(req)); } catch (err) { return texto_('Ha fallado el servidor de Mi espacio. Inténtalo en un momento.'); } }
     const ses = sesion_(req.token);
     if (!ses) return salida_({ ok: false, error: 'auth' });
     if (req.op === 'pull') return salida_(pull_(req));
     if (req.op === 'push') return salida_(push_(req));
+    if (req.op === 'cal') return salida_(calendario_(req));
+    if (req.op === 'atajos') return salida_(atajosClave_(req));
     if (req.op === 'logout') { PropertiesService.getScriptProperties().deleteProperty(ses.clave); return salida_({ ok: true }); }
     return salida_({ ok: false, error: 'op' });
   } catch (err) {
@@ -314,9 +336,296 @@ function validar_(c) {
   if (typeof j.folder !== 'string' || j.folder.length > 120) return 'datos';
   if (j.title !== undefined && (typeof j.title !== 'string' || j.title.length > 300)) return 'datos';
   if (j.body !== undefined && (typeof j.body !== 'string' || j.body.length > 300000)) return 'datos';
-  for (const n of ['pos', 'created', 'updated', 'done', 'amt']) if (j[n] !== undefined && !Number.isFinite(j[n])) return 'datos';
-  for (const s of ['cat', 'day', 'src', 'upto']) if (j[s] !== undefined && (typeof j[s] !== 'string' || j[s].length > 120)) return 'datos';
+  for (const n of ['pos', 'created', 'updated', 'done', 'amt', 'dow', 'goal']) if (j[n] !== undefined && !Number.isFinite(j[n])) return 'datos';
+  for (const s of ['cat', 'day', 'src', 'upto', 't', 'subj', 'room', 'hs', 'he', 'col']) if (j[s] !== undefined && (typeof j[s] !== 'string' || j[s].length > 120)) return 'datos';
+  for (const s of ['mail', 'ph', 'hours', 'url']) if (j[s] !== undefined && (typeof j[s] !== 'string' || j[s].length > 2000)) return 'datos';
+  if (j.hd !== undefined && (typeof j.hd !== 'string' || j.hd.length > 40000 || (j.hd && !/^\d{8}(,\d{8})*$/.test(j.hd)))) return 'datos';   // días de un hábito
   return null;
+}
+
+/* ================= Google Calendar (solo lectura) ================= */
+
+// Eventos de hoy y los próximos días de todos tus calendarios visibles, y lo próximo de los
+// calendarios de la universidad. Se guarda 2 minutos en caché para no leer el calendario en cada consulta.
+function calendario_(req) {
+  const dias = Math.max(1, Math.min(31, Math.floor(Number(req.dias) || 7)));
+  const atras = Math.max(0, Math.min(7, Math.floor(Number(req.atras) || 0)));   // días hacia atrás (para ver la semana entera en el horario)
+  const unis = (Array.isArray(req.unis) ? req.unis : []).filter(x => typeof x === 'string' && x.trim()).map(x => x.trim().slice(0, 100)).slice(0, 5);
+  const tz = Session.getScriptTimeZone();
+  const hoy = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
+  const cache = CacheService.getScriptCache();
+  const clave = 'cal_' + huella_(JSON.stringify([hoy, dias, atras, unis])).slice(0, 40);
+  const guardado = cache.get(clave);
+  if (guardado) { try { return JSON.parse(guardado); } catch (e) {} }
+
+  let cals;
+  try { cals = calendarios_(); }
+  catch (e) { return { ok: false, error: 'calendario', msg: 'Falta el permiso de Google Calendar. En la hoja: menú Mi espacio > 3. Conectar Google Calendar.' }; }
+  const inicio = Utilities.parseDate(hoy + ' 00:00', tz, 'yyyy-MM-dd HH:mm');
+  const fin = new Date(inicio.getTime() + dias * 864e5 + 3600e3);
+  const desde = new Date(inicio.getTime() - atras * 864e5);
+  const ev = [];
+  for (const c of cals) {
+    try { for (const e of c.getEvents(desde, fin)) { const x = evento_(e, c, false); if (x) ev.push(x); } } catch (e) {}
+    if (ev.length > 600) break;
+  }
+  ev.sort(ordenEventos_);
+  const uni = {};
+  const finUni = new Date(inicio.getTime() + 366 * 864e5);
+  for (const nombre of unis) {
+    const c = buscarCalendario_(cals, nombre);
+    if (!c) { uni[nombre] = { found: false }; continue; }
+    const lista = [];
+    try { for (const e of c.getEvents(inicio, finUni)) { const x = evento_(e, c, true); if (x) lista.push(x); if (lista.length >= 80) break; } } catch (e) {}
+    lista.sort(ordenEventos_);
+    uni[nombre] = { found: true, name: c.getName(), col: c.getColor(), ev: lista };
+  }
+  const res = { ok: true, tz: tz, hoy: hoy, dias: dias, atras: atras, ev: ev, uni: uni, cals: cals.map(c => c.getName()), now: Date.now() };
+  const txt = JSON.stringify(res);
+  if (txt.length < 90000) cache.put(clave, txt, 120);
+  return res;
+}
+
+function calendarios_() {
+  return CalendarApp.getAllCalendars().filter(c => { try { return !c.isHidden(); } catch (e) { return true; } });
+}
+
+function sinAcentos_(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim(); }
+function buscarCalendario_(cals, nombre) {
+  const n = sinAcentos_(nombre);
+  return cals.find(c => sinAcentos_(c.getName()) === n) || cals.find(c => sinAcentos_(c.getName()).indexOf(n) >= 0) || null;
+}
+
+// all: día completo (s y e son 'AAAA-MM-DD', e no incluido); si no, s y e son milisegundos.
+function evento_(e, c, conDetalle) {
+  try {
+    if (e.getMyStatus && e.getMyStatus() === CalendarApp.GuestStatus.NO) return null;
+  } catch (x) {}
+  const tz = c.getTimeZone() || Session.getScriptTimeZone();
+  const o = { t: String(e.getTitle() || '').slice(0, 200), cal: c.getName(), col: c.getColor() };
+  if (e.isAllDayEvent()) {
+    o.all = 1;
+    o.s = Utilities.formatDate(e.getAllDayStartDate(), tz, 'yyyy-MM-dd');
+    o.e = Utilities.formatDate(e.getAllDayEndDate(), tz, 'yyyy-MM-dd');
+  } else {
+    o.s = e.getStartTime().getTime();
+    o.e = e.getEndTime().getTime();
+  }
+  // clave para ordenar (no se envía a la app)
+  Object.defineProperty(o, '_k', { value: o.all ? e.getAllDayStartDate().getTime() : o.s, enumerable: false });
+  const loc = String(e.getLocation() || '').trim();
+  if (loc) o.loc = loc.slice(0, 160);
+  if (conDetalle) {
+    const d = String(e.getDescription() || '').replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').trim();
+    if (d) o.desc = d.slice(0, 400);
+  }
+  return o;
+}
+function ordenEventos_(a, b) {
+  return a._k - b._k || (b.all ? 1 : 0) - (a.all ? 1 : 0);
+}
+
+/* ================= atajos de Siri ================= */
+// Los atajos de la app Atajos del iPhone llaman aquí con { op: 'atajo', clave, accion, … }.
+// Usan una clave propia (no la contraseña): solo permite AÑADIR cosas y leer la agenda de hoy.
+// La clave la crea la app (Configuración → Atajos de Siri); aquí se guarda solo su huella.
+// La respuesta es texto normal, para que el atajo la enseñe o Siri la diga en voz alta.
+
+function atajosClave_(req) {
+  const props = PropertiesService.getScriptProperties();
+  if (req.accion === 'crear') {
+    const clave = hex_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, Utilities.getUuid() + Utilities.getUuid() + Date.now())).slice(0, 32);
+    props.setProperty('ATAJO', huella_('atajo:' + clave));
+    return { ok: true, activo: true, clave: clave };
+  }
+  if (req.accion === 'quitar') { props.deleteProperty('ATAJO'); return { ok: true, activo: false }; }
+  return { ok: true, activo: !!props.getProperty('ATAJO') };
+}
+
+function desactivarAtajos() {
+  PropertiesService.getScriptProperties().deleteProperty('ATAJO');
+  SpreadsheetApp.getUi().alert('Atajos de Siri desactivados. Para volver a usarlos, crea una clave nueva en la app.');
+}
+
+function texto_(t) { return ContentService.createTextOutput(String(t)).setMimeType(ContentService.MimeType.TEXT); }
+
+function atajo_(req) {
+  const guardada = PropertiesService.getScriptProperties().getProperty('ATAJO');
+  if (!guardada) return 'Los atajos están desactivados. Actívalos en la app: Configuración, Atajos de Siri.';
+  const clave = typeof req.clave === 'string' ? req.clave.trim().toLowerCase() : '';
+  if (!/^[0-9a-f]{32}$/.test(clave) || !iguales_(huella_('atajo:' + clave), guardada)) {
+    Utilities.sleep(800);
+    return 'La clave del atajo no es correcta. Cópiala otra vez desde la app: Configuración, Atajos de Siri.';
+  }
+  const accion = sinAcentos_(req.accion);
+  const d = estado_();
+  if (accion === 'gasto') return atajoGasto_(req, d);
+  if (accion === 'habito') return atajoHabito_(req, d);
+  if (accion === 'recordatorio') return atajoRecordatorio_(req, d);
+  if (accion === 'nota') return atajoNota_(req, d);
+  if (accion === 'hoy') return atajoHoy_(d);
+  return 'No conozco la acción «' + String(req.accion || '').slice(0, 30) + '». Usa gasto, habito, recordatorio, nota u hoy.';
+}
+
+// Inicio y entradas tal como están ahora en la hoja.
+function estado_() {
+  let home = { items: {}, order: [] };
+  const entradas = [];
+  for (const f of leer_(hoja_())) {
+    if (f.del) continue;
+    let j; try { j = JSON.parse(f.json); } catch (e) { continue; }
+    if (f.k === 'app') home = j;
+    else entradas.push({ id: f.k.slice(2), ver: f.ver, j: j });
+  }
+  // si la app aún no ha guardado el inicio, se usan las secciones que trae de serie
+  if (!home.items || !Object.keys(home.items).length) home = { order: [], items: { notas: { kind: 'notes', name: 'Notas' }, finanzas: { kind: 'money', name: 'Finanzas' }, recordatorios: { kind: 'list', name: 'Recordatorios' }, universidad: { kind: 'uni', name: 'Universidad' } } };
+  return { home: home, items: Object.keys(home.items || {}).map(id => Object.assign({ id: id }, home.items[id])), entradas: entradas };
+}
+// Carpeta de un tipo: la que se llame como «carpeta» (si se dice), si no la preferida o la primera.
+function carpeta_(d, kind, nombre, preferida) {
+  const deTipo = d.items.filter(i => i.kind === kind);
+  if (nombre) { const n = sinAcentos_(nombre); const x = deTipo.find(i => sinAcentos_(i.name) === n) || deTipo.find(i => sinAcentos_(i.name).indexOf(n) >= 0); if (x) return x; }
+  return deTipo.find(i => i.id === preferida) || deTipo[0] || null;
+}
+function nuevoId_() { return 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function guardar_(cambios) {
+  const r = push_({ changes: cambios });
+  if (!r.ok) return false;
+  return r.res.every(x => x.ok);
+}
+function hoy_() { return Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd'); }
+function euros_(c) { return (c / 100).toFixed(2).replace('.', ',').replace(/,00$/, '') + ' €'; }
+function limpio_(s, max) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim().slice(0, max); }
+
+const CATEGORIAS_ = [
+  ['super', /mercadona|lidl|carrefour|dia\b|aldi|super|compra/],
+  ['comida', /cafe|bar\b|restaurante|comida|cena|desayuno|almuerzo|tapas|burger|pizza|kebab|mcdonald|telepizza/],
+  ['transporte', /bus|metro|tranvia|tren|renfe|taxi|uber|cabify|gasolina|parking|bici/],
+  ['suscripciones', /netflix|spotify|hbo|disney|amazon prime|icloud|youtube|chatgpt|claude/],
+  ['salud', /farmacia|medico|dentista|fisio/],
+  ['estudios', /libro|apuntes|fotocopia|universidad|matricula|curso|academia/],
+  ['ocio', /cine|concierto|entrada|fiesta|discoteca|teatro|museo|juego/],
+  ['regalos', /regalo|cumple/],
+  ['compras', /ropa|zara|zapatillas|amazon|tienda/],
+  ['viajes', /hotel|vuelo|avion|ryanair|vueling|airbnb|viaje/],
+];
+function atajoGasto_(req, d) {
+  const f = carpeta_(d, 'money', req.carpeta, 'finanzas');
+  if (!f) return 'No tienes ninguna sección de Finanzas. Créala en la app con el botón +.';
+  let amt;
+  if (typeof req.importe === 'number') amt = Math.round(req.importe * 100);
+  else {
+    let s = String(req.importe || '').replace(/[^\d.,]/g, '');
+    if (s.indexOf(',') >= 0) s = s.replace(/\./g, '').replace(',', '.');
+    amt = Math.round(parseFloat(s) * 100);
+  }
+  if (!(amt > 0 && amt <= 1e9)) return 'No he entendido el importe. Dímelo con números, por ejemplo 4,50.';
+  let concepto = limpio_(req.concepto, 60);
+  concepto = concepto.charAt(0).toUpperCase() + concepto.slice(1);
+  const n = sinAcentos_(concepto), hoy = hoy_();
+  // categoría: la de la última vez que apuntaste lo mismo; si no, por palabras; si no, «otros»
+  let cat = '';
+  const previos = d.entradas.filter(e => e.j.folder === f.id && !e.j.rep && !e.j.inc && n && sinAcentos_(e.j.title) === n).sort((a, b) => (b.j.created || 0) - (a.j.created || 0));
+  if (previos.length && previos[0].j.cat) cat = previos[0].j.cat;
+  if (!cat) for (const c of CATEGORIAS_) if (c[1].test(n)) { cat = c[0]; break; }
+  if (!cat) cat = 'otros';
+  const ahora = Date.now();
+  const j = { folder: f.id, title: concepto, body: '', pos: 0, created: ahora, updated: ahora, amt: amt, cat: cat, day: hoy };
+  if (!guardar_([{ k: 'e:' + nuevoId_(), b: 0, t: ahora, j: j }])) return 'No se ha podido guardar. Inténtalo otra vez.';
+  const mes = hoy.slice(0, 7);
+  let total = amt;
+  for (const e of d.entradas) if (e.j.folder === f.id && !e.j.rep && !e.j.inc && e.j.day && e.j.day.slice(0, 7) === mes && e.j.day <= hoy) total += e.j.amt || 0;
+  let t = 'Apuntado: ' + euros_(amt) + (concepto ? ' en ' + concepto : '') + '. Este mes llevas ' + euros_(total) + '.';
+  if (f.budget) { const q = f.budget - total; t += q >= 0 ? ' Te quedan ' + euros_(q) + ' del presupuesto.' : ' Te has pasado del presupuesto en ' + euros_(-q) + '.'; }
+  return t;
+}
+
+function diaClave_(date) { return Utilities.formatDate(date, Session.getScriptTimeZone(), 'yyyyMMdd'); }
+function atajoHabito_(req, d) {
+  const carpetas = d.items.filter(i => i.kind === 'habits').map(i => i.id);
+  const habitos = d.entradas.filter(e => carpetas.indexOf(e.j.folder) >= 0);
+  if (!habitos.length) return 'No tienes hábitos todavía. Créalos en la app: botón +, Hábitos.';
+  const n = sinAcentos_(req.nombre);
+  if (!n) return 'Dime qué hábito quieres marcar.';
+  const h = habitos.find(e => sinAcentos_(e.j.title) === n) || habitos.find(e => sinAcentos_(e.j.title).indexOf(n) >= 0) || habitos.find(e => n.indexOf(sinAcentos_(e.j.title)) >= 0);
+  if (!h) return 'No encuentro el hábito «' + limpio_(req.nombre, 40) + '». Tus hábitos son: ' + habitos.map(e => e.j.title).join(', ') + '.';
+  const hoy = diaClave_(new Date());
+  const dias = h.j.hd ? h.j.hd.split(',') : [];
+  const ya = dias.indexOf(hoy) >= 0;
+  if (!ya) {
+    dias.push(hoy); dias.sort();
+    const j = Object.assign({}, h.j, { hd: dias.join(','), updated: Date.now() });
+    if (!guardar_([{ k: 'e:' + h.id, b: h.ver, t: Date.now(), j: j }])) return 'No se ha podido guardar. Inténtalo otra vez.';
+  }
+  const set = {}; dias.forEach(x => { set[x] = 1; });
+  const goal = h.j.goal || 7;
+  let t = (ya ? h.j.title + ' ya estaba marcado hoy.' : h.j.title + ' marcado.');
+  if (goal >= 7) {
+    let racha = 0; const dd = new Date();
+    while (set[diaClave_(dd)]) { racha++; dd.setDate(dd.getDate() - 1); }
+    t += racha > 1 ? ' Llevas ' + racha + ' días seguidos.' : ' Primer día de la racha.';
+  } else {
+    const dd = new Date(); const dow = (Number(Utilities.formatDate(dd, Session.getScriptTimeZone(), 'u')) + 6) % 7;   // 0 = lunes
+    let semana = 0; for (let i = 0; i <= dow; i++) { const x = new Date(dd.getTime() - i * 864e5); if (set[diaClave_(x)]) semana++; }
+    t += ' Esta semana: ' + semana + ' de ' + goal + '.' + (semana >= goal ? ' Objetivo cumplido.' : '');
+  }
+  return t;
+}
+
+function atajoRecordatorio_(req, d) {
+  const f = carpeta_(d, 'list', req.carpeta, 'recordatorios');
+  if (!f) return 'No tienes ninguna lista. Créala en la app con el botón +.';
+  const lineas = String(req.texto || '').split(/\n|,\s*y\s+|\s+y\s+luego\s+/).map(s => limpio_(s, 300)).filter(Boolean).slice(0, 20);
+  if (!lineas.length) return 'Dime qué quieres añadir.';
+  const deLista = d.entradas.filter(e => e.j.folder === f.id);
+  let min = deLista.reduce((m, e) => Math.min(m, Number(e.j.pos) || 0), Infinity);
+  if (!isFinite(min)) min = 1000;
+  const ahora = Date.now();
+  const cambios = lineas.map((x, i) => ({ k: 'e:' + nuevoId_() + i, b: 0, t: ahora, j: { folder: f.id, title: x, body: '', pos: min - 1000 * (lineas.length - i), created: ahora, updated: ahora } }));
+  if (!guardar_(cambios)) return 'No se ha podido guardar. Inténtalo otra vez.';
+  const pendientes = deLista.filter(e => !e.j.done).length + lineas.length;
+  return (lineas.length === 1 ? 'Añadido a ' + f.name + '.' : 'Añadidas ' + lineas.length + ' cosas a ' + f.name + '.') + ' Tienes ' + pendientes + (pendientes === 1 ? ' pendiente.' : ' pendientes.');
+}
+
+function atajoNota_(req, d) {
+  const f = carpeta_(d, 'notes', req.carpeta, 'notas');
+  if (!f) return 'No tienes ninguna carpeta de notas. Créala en la app con el botón +.';
+  const texto = String(req.texto || '').trim().slice(0, 20000);
+  if (!texto) return 'La nota está vacía.';
+  const ahora = Date.now();
+  const j = { folder: f.id, title: limpio_(req.titulo, 120), body: texto, pos: 0, created: ahora, updated: ahora };
+  if (!guardar_([{ k: 'e:' + nuevoId_(), b: 0, t: ahora, j: j }])) return 'No se ha podido guardar. Inténtalo otra vez.';
+  return 'Nota guardada en ' + f.name + '.';
+}
+
+// Lo que queda hoy: eventos de Google Calendar y clases del horario, por orden.
+function atajoHoy_(d) {
+  const tz = Session.getScriptTimeZone(), ahora = Date.now(), hoy = hoy_();
+  const hora = ms => Utilities.formatDate(new Date(ms), tz, 'H:mm');
+  const cosas = [];
+  let sinCal = false;
+  const cal = calendario_({ dias: 1, atras: 0, unis: [] });
+  if (cal.ok) {
+    for (const e of cal.ev) {
+      if (e.all) { if (e.s <= hoy && hoy < e.e) cosas.push({ s: 0, t: e.t + ' (todo el día)' }); continue; }
+      if (e.e > ahora && Utilities.formatDate(new Date(e.s), tz, 'yyyy-MM-dd') <= hoy) cosas.push({ s: e.s, t: (e.s > ahora ? 'a las ' + hora(e.s) + ', ' : 'ahora, hasta las ' + hora(e.e) + ', ') + e.t + (e.loc ? ' en ' + e.loc : '') });
+    }
+  } else sinCal = true;
+  const dow = Number(Utilities.formatDate(new Date(), tz, 'u'));   // 1 = lunes
+  const unis = d.items.filter(i => i.kind === 'uni').map(i => i.id);
+  for (const e of d.entradas) {
+    const j = e.j;
+    if (j.t !== 'class' || j.dow !== dow || unis.indexOf(j.folder) < 0 || !/^\d\d:\d\d$/.test(j.hs || '') || !/^\d\d:\d\d$/.test(j.he || '')) continue;
+    const s = Utilities.parseDate(hoy + ' ' + j.hs, tz, 'yyyy-MM-dd HH:mm').getTime(), fin = Utilities.parseDate(hoy + ' ' + j.he, tz, 'yyyy-MM-dd HH:mm').getTime();
+    if (fin > ahora) cosas.push({ s: s, t: (s > ahora ? 'a las ' + hora(s) + ', ' : 'ahora, hasta las ' + hora(fin) + ', ') + 'clase de ' + j.title + (j.room ? ' en ' + j.room : '') });
+  }
+  cosas.sort((a, b) => a.s - b.s);
+  let t;
+  if (!cosas.length) t = 'No te queda nada más hoy.';
+  else if (cosas.length === 1) t = 'Hoy te queda una cosa: ' + cosas[0].t + '.';
+  else t = 'Hoy te quedan ' + cosas.length + ' cosas: ' + cosas.slice(0, 8).map(c => c.t).join('; ') + '.';
+  if (sinCal) t += ' (No he podido leer tu Google Calendar: falta darle permiso desde la hoja.)';
+  return t;
 }
 
 function construir_(k, rev, ver, editado, del, j, json) {
