@@ -1320,7 +1320,7 @@ function syncChanged(){ syncListeners.forEach(f => f()); }
 // que solo conoce el script; aquí se guarda únicamente un token de sesión de este dispositivo.
 // SS imita la interfaz de la base de datos de claude.ai (doc, collection, set, delete, onSnapshot)
 // para reutilizar toda la lógica de la app.
-const SERVIDOR_URL = 'https://script.google.com/macros/s/AKfycbx4FG3wXolI6MPQUWsIjQaDxW6iuIducFLxbntAlhvgtlv_i-TDPGXb5uUKGFAA5mPgwA/exec';                      // dirección /exec del Apps Script (no es secreta)
+const SERVIDOR_URL = 'https://script.google.com/macros/s/AKfycbwpcgU7k0kZlHEZYuj61_GOAw0u5Ho9WV-8RFyvx5zvKHZ_l9vMyw4_fCT41qe2dRcW/exec';                      // dirección /exec del Apps Script (no es secreta)
 const K_SRV = 'miespacio.servidor.v1';        // dirección pegada en este navegador, si no está arriba
 const K_SES = 'miespacio.sesion.v1';          // token de sesión de este dispositivo
 const K_HOJA = 'miespacio.hoja.v1';           // última copia de la hoja, para abrir rápido y sin conexión
