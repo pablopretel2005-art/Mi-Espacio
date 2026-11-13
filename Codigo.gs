@@ -10,7 +10,8 @@
  *   3. Conectar Google Calendar (da permiso para LEER tu calendario: widget de hoy y exámenes)
  *
  * Atajos de Siri: la app crea una clave aparte (Configuración → Atajos de Siri) que solo sirve
- * para añadir gastos, hábitos, recordatorios y notas, y para preguntar «¿qué tengo hoy?».
+ * para añadir gastos, hábitos, recordatorios y notas, y para preguntar por tu agenda (hoy, mañana,
+ * próxima clase, próximo examen) y por lo que llevas gastado este mes.
  *
  * La contraseña no se guarda tal cual: solo una «huella» con sal en las propiedades del script.
  *
@@ -449,7 +450,11 @@ function desactivarAtajos() {
 
 function texto_(t) { return ContentService.createTextOutput(String(t)).setMimeType(ContentService.MimeType.TEXT); }
 
-function atajo_(req) {
+function atajo_(crudo) {
+  // Los nombres de los campos se aceptan con tilde, mayúsculas o espacios («Acción», «Importe »…),
+  // que es como a veces los escribe el teclado del iPhone.
+  const req = {};
+  for (const k in crudo) { const n = sinAcentos_(k).replace(/[^a-z]/g, ''); if (n && !(n in req)) req[n] = crudo[k]; }
   const guardada = PropertiesService.getScriptProperties().getProperty('ATAJO');
   if (!guardada) return 'Los atajos están desactivados. Actívalos en la app: Configuración, Atajos de Siri.';
   const clave = typeof req.clave === 'string' ? req.clave.trim().toLowerCase() : '';
@@ -464,7 +469,12 @@ function atajo_(req) {
   if (accion === 'recordatorio') return atajoRecordatorio_(req, d);
   if (accion === 'nota') return atajoNota_(req, d);
   if (accion === 'hoy') return atajoHoy_(d);
-  return 'No conozco la acción «' + String(req.accion || '').slice(0, 30) + '». Usa gasto, habito, recordatorio, nota u hoy.';
+  if (accion === 'manana') return atajoManana_(d);
+  if (accion === 'clase') return atajoClase_(d);
+  if (accion === 'examen') return atajoExamen_(d);
+  if (accion === 'mes' || accion === 'gastos') return atajoMes_(req, d);
+  if (!accion) return 'Al atajo le falta el campo «accion» (sin tilde). Revisa los pasos en la app: Configuración, Atajos de Siri.';
+  return 'No conozco la acción «' + String(req.accion || '').slice(0, 30) + '». Usa gasto, habito, recordatorio, nota, hoy, manana, clase, examen o mes.';
 }
 
 // Inicio y entradas tal como están ahora en la hoja.
@@ -625,6 +635,115 @@ function atajoHoy_(d) {
   else if (cosas.length === 1) t = 'Hoy te queda una cosa: ' + cosas[0].t + '.';
   else t = 'Hoy te quedan ' + cosas.length + ' cosas: ' + cosas.slice(0, 8).map(c => c.t).join('; ') + '.';
   if (sinCal) t += ' (No he podido leer tu Google Calendar: falta darle permiso desde la hoja.)';
+  return t;
+}
+
+const DIAS_ = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+const MESES_ = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+// Fecha 'AAAA-MM-DD' de dentro de n días, día de la semana (1 = lunes) y días entre dos fechas.
+function diaMas_(n) {
+  const tz = Session.getScriptTimeZone();
+  const medio = Utilities.parseDate(hoy_() + ' 12:00', tz, 'yyyy-MM-dd HH:mm');
+  return Utilities.formatDate(new Date(medio.getTime() + n * 864e5), tz, 'yyyy-MM-dd');
+}
+function dowDe_(dia) { const p = dia.split('-').map(Number); return ((new Date(Date.UTC(p[0], p[1] - 1, p[2])).getUTCDay() + 6) % 7) + 1; }
+function diasEntre_(a, b) { const x = a.split('-').map(Number), y = b.split('-').map(Number); return Math.round((Date.UTC(y[0], y[1] - 1, y[2]) - Date.UTC(x[0], x[1] - 1, x[2])) / 864e5); }
+function fechaLarga_(dia) { const p = dia.split('-').map(Number); return 'el ' + DIAS_[dowDe_(dia) - 1] + ' ' + p[2] + ' de ' + MESES_[p[1] - 1]; }
+function clases_(d) {
+  const unis = d.items.filter(i => i.kind === 'uni').map(i => i.id);
+  return d.entradas.map(e => e.j).filter(j => j.t === 'class' && unis.indexOf(j.folder) >= 0 && /^\d\d:\d\d$/.test(j.hs || '') && /^\d\d:\d\d$/.test(j.he || ''));
+}
+
+// Todo lo de mañana: eventos de Google Calendar y clases del horario, por orden.
+function atajoManana_(d) {
+  const tz = Session.getScriptTimeZone(), dia = diaMas_(1);
+  const hora = ms => Utilities.formatDate(new Date(ms), tz, 'H:mm');
+  const cosas = [];
+  let sinCal = false;
+  const cal = calendario_({ dias: 2, atras: 0, unis: [] });
+  if (cal.ok) {
+    for (const e of cal.ev) {
+      if (e.all) { if (e.s <= dia && dia < e.e) cosas.push({ s: 0, t: e.t + ' (todo el día)' }); continue; }
+      if (Utilities.formatDate(new Date(e.s), tz, 'yyyy-MM-dd') === dia) cosas.push({ s: e.s, t: 'a las ' + hora(e.s) + ', ' + e.t + (e.loc ? ' en ' + e.loc : '') });
+    }
+  } else sinCal = true;
+  const dow = dowDe_(dia);
+  for (const j of clases_(d)) {
+    if (j.dow !== dow) continue;
+    const s = Utilities.parseDate(dia + ' ' + j.hs, tz, 'yyyy-MM-dd HH:mm').getTime();
+    cosas.push({ s: s, t: 'a las ' + hora(s) + ', clase de ' + j.title + (j.room ? ' en ' + j.room : '') });
+  }
+  cosas.sort((a, b) => a.s - b.s);
+  let t;
+  if (!cosas.length) t = 'Mañana no tienes nada apuntado.';
+  else if (cosas.length === 1) t = 'Mañana tienes una cosa: ' + cosas[0].t + '.';
+  else t = 'Mañana tienes ' + cosas.length + ' cosas: ' + cosas.slice(0, 8).map(c => c.t).join('; ') + '.';
+  if (sinCal) t += ' (No he podido leer tu Google Calendar: falta darle permiso desde la hoja.)';
+  return t;
+}
+
+// La clase que tienes ahora y la siguiente del horario (mira hasta una semana).
+function atajoClase_(d) {
+  const lista = clases_(d);
+  if (!lista.length) return 'No tienes clases en tu horario. Añádelas en la app: Universidad, Horario.';
+  const tz = Session.getScriptTimeZone(), ahora = Date.now();
+  const hora = ms => Utilities.formatDate(new Date(ms), tz, 'H:mm');
+  let actual = null, sig = null;
+  for (let n = 0; n <= 7 && !sig; n++) {
+    const dia = diaMas_(n), dow = dowDe_(dia);
+    const delDia = lista.filter(j => j.dow === dow).map(j => ({ j: j, s: Utilities.parseDate(dia + ' ' + j.hs, tz, 'yyyy-MM-dd HH:mm').getTime(), e: Utilities.parseDate(dia + ' ' + j.he, tz, 'yyyy-MM-dd HH:mm').getTime(), n: n, dia: dia })).sort((a, b) => a.s - b.s);
+    for (const c of delDia) {
+      if (c.s <= ahora && c.e > ahora) { if (!actual) actual = c; continue; }
+      if (c.s > ahora) { sig = c; break; }
+    }
+  }
+  const cuando = c => (c.n === 0 ? 'hoy' : c.n === 1 ? 'mañana' : 'el ' + DIAS_[dowDe_(c.dia) - 1]) + ' a las ' + hora(c.s);
+  const sitio = c => (c.j.room ? ', en ' + c.j.room : '');
+  let t = '';
+  if (actual) t = 'Ahora tienes ' + actual.j.title + sitio(actual) + ', hasta las ' + hora(actual.e) + '. ';
+  if (sig) t += (actual ? 'Después, ' : 'Tu próxima clase es ') + sig.j.title + ', ' + cuando(sig) + sitio(sig) + '.';
+  else if (!actual) t = 'No tienes más clases esta semana.';
+  return t.trim();
+}
+
+// Lo siguiente del calendario de la universidad (exámenes y entregas).
+function atajoExamen_(d) {
+  const uni = d.items.filter(i => i.kind === 'uni')[0];
+  if (!uni) return 'No tienes la sección Universidad. Créala en la app con el botón +.';
+  const nombre = uni.calName || 'Universidad';
+  const cal = calendario_({ dias: 1, atras: 0, unis: [nombre] });
+  if (!cal.ok) return 'No he podido leer tu Google Calendar: falta darle permiso desde la hoja.';
+  const u = cal.uni[nombre];
+  if (!u || !u.found) return 'No encuentro el calendario «' + nombre + '» en tu Google Calendar.';
+  const tz = Session.getScriptTimeZone(), hoy = hoy_();
+  const diaDe = e => (e.all ? e.s : Utilities.formatDate(new Date(e.s), tz, 'yyyy-MM-dd'));
+  const prox = u.ev.filter(e => diaDe(e) >= hoy);
+  if (!prox.length) return 'No tienes nada próximo en el calendario «' + u.name + '».';
+  const falta = e => { const n = diasEntre_(hoy, diaDe(e)); return n <= 0 ? 'hoy' : n === 1 ? 'mañana' : fechaLarga_(diaDe(e)) + ', dentro de ' + n + ' días'; };
+  const hora = e => (e.all ? '' : ' a las ' + Utilities.formatDate(new Date(e.s), tz, 'H:mm'));
+  let t = 'Lo siguiente es ' + prox[0].t + ', ' + falta(prox[0]) + hora(prox[0]) + '.';
+  if (prox[1]) t += ' Después, ' + prox[1].t + ', ' + falta(prox[1]) + '.';
+  return t;
+}
+
+// Lo que llevas gastado este mes y lo que queda del presupuesto.
+function atajoMes_(req, d) {
+  const f = carpeta_(d, 'money', req.carpeta, 'finanzas');
+  if (!f) return 'No tienes ninguna sección de Finanzas. Créala en la app con el botón +.';
+  const hoy = hoy_(), mes = hoy.slice(0, 7);
+  let total = 0, n = 0;
+  const porCat = {};
+  for (const e of d.entradas) {
+    const j = e.j;
+    if (j.folder !== f.id || j.rep || j.inc || !j.day || j.day.slice(0, 7) !== mes || j.day > hoy) continue;
+    total += j.amt || 0; n++;
+    porCat[j.cat || 'otros'] = (porCat[j.cat || 'otros'] || 0) + (j.amt || 0);
+  }
+  if (!n) return 'Este mes todavía no has apuntado ningún gasto.';
+  let t = 'Este mes llevas ' + euros_(total) + ' en ' + n + (n === 1 ? ' gasto.' : ' gastos.');
+  const mayor = Object.keys(porCat).sort((a, b) => porCat[b] - porCat[a])[0];
+  if (n > 1 && mayor) t += ' Donde más, en ' + mayor.replace('super', 'súper') + ': ' + euros_(porCat[mayor]) + '.';
+  if (f.budget) { const q = f.budget - total; t += q >= 0 ? ' Te quedan ' + euros_(q) + ' del presupuesto.' : ' Te has pasado del presupuesto en ' + euros_(-q) + '.'; }
   return t;
 }
 
