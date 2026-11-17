@@ -625,7 +625,7 @@ function atajoHoy_(d) {
   const unis = d.items.filter(i => i.kind === 'uni').map(i => i.id);
   for (const e of d.entradas) {
     const j = e.j;
-    if (j.t !== 'class' || j.dow !== dow || unis.indexOf(j.folder) < 0 || !/^\d\d:\d\d$/.test(j.hs || '') || !/^\d\d:\d\d$/.test(j.he || '')) continue;
+    if (j.t !== 'class' || j.dow !== dow || unis.indexOf(j.folder) < 0 || !esDelCuatri_(j) || !/^\d\d:\d\d$/.test(j.hs || '') || !/^\d\d:\d\d$/.test(j.he || '')) continue;
     const s = Utilities.parseDate(hoy + ' ' + j.hs, tz, 'yyyy-MM-dd HH:mm').getTime(), fin = Utilities.parseDate(hoy + ' ' + j.he, tz, 'yyyy-MM-dd HH:mm').getTime();
     if (fin > ahora) cosas.push({ s: s, t: (s > ahora ? 'a las ' + hora(s) + ', ' : 'ahora, hasta las ' + hora(fin) + ', ') + 'clase de ' + j.title + (j.room ? ' en ' + j.room : '') });
   }
@@ -649,9 +649,17 @@ function diaMas_(n) {
 function dowDe_(dia) { const p = dia.split('-').map(Number); return ((new Date(Date.UTC(p[0], p[1] - 1, p[2])).getUTCDay() + 6) % 7) + 1; }
 function diasEntre_(a, b) { const x = a.split('-').map(Number), y = b.split('-').map(Number); return Math.round((Date.UTC(y[0], y[1] - 1, y[2]) - Date.UTC(x[0], x[1] - 1, x[2])) / 864e5); }
 function fechaLarga_(dia) { const p = dia.split('-').map(Number); return 'el ' + DIAS_[dowDe_(dia) - 1] + ' ' + p[2] + ' de ' + MESES_[p[1] - 1]; }
+// Cuatrimestre de ahora, con la misma regla que la app: de agosto a enero, el 1.º; de febrero a julio, el 2.º.
+// Cada clase guarda su cuatrimestre en «cat» ('1' o '2'); las que no lo tienen son del 1.º.
+function cuatriActual_() {
+  const m = Number(Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'M'));
+  return m >= 2 && m <= 7 ? '2' : '1';
+}
+function esDelCuatri_(j) { return (j.cat === '2' ? '2' : '1') === cuatriActual_(); }
+// Las clases del cuatrimestre de ahora.
 function clases_(d) {
   const unis = d.items.filter(i => i.kind === 'uni').map(i => i.id);
-  return d.entradas.map(e => e.j).filter(j => j.t === 'class' && unis.indexOf(j.folder) >= 0 && /^\d\d:\d\d$/.test(j.hs || '') && /^\d\d:\d\d$/.test(j.he || ''));
+  return d.entradas.map(e => e.j).filter(j => j.t === 'class' && unis.indexOf(j.folder) >= 0 && esDelCuatri_(j) && /^\d\d:\d\d$/.test(j.hs || '') && /^\d\d:\d\d$/.test(j.he || ''));
 }
 
 // Todo lo de mañana: eventos de Google Calendar y clases del horario, por orden.
