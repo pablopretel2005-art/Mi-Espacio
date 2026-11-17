@@ -529,6 +529,26 @@ input[type="date"].inp::-webkit-calendar-picker-indicator{filter:invert(1);opaci
 .u-sec button{display:flex;align-items:center;gap:4px;height:32px;padding:0 4px;border-radius:10px}
 .u-sec button svg{width:17px;height:17px;stroke-width:2.2}
 .u-sec button:active{opacity:.5}
+.xhero{position:relative;display:block;width:100%;text-align:left;padding:18px 18px 17px;border-radius:var(--r-card);background:var(--card);overflow:hidden}
+.xhero.tint{background:linear-gradient(150deg,var(--c1) 0%,var(--c2) 62%,rgba(0,0,0,0) 100%),var(--n141414);box-shadow:inset 0 0 0 1px var(--cb)}
+.xh-k{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.xhero.tint .xh-k{color:var(--c)}
+.xh-row{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-top:8px}
+.xh-t{min-width:0}
+.xh-t b{display:block;font-size:22px;line-height:1.2;font-weight:700;letter-spacing:-.02em;overflow-wrap:anywhere}
+.xh-t small{display:block;margin-top:5px;color:var(--nc7c7cc);font-size:14.5px;line-height:1.35}
+.xh-n{flex:none;text-align:right}
+.xh-n b{display:block;font-size:44px;line-height:1;font-weight:700;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.xh-n small{display:block;margin-top:3px;color:var(--muted);font-size:13px}
+.xlist{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.xrow{display:grid;grid-template-columns:46px minmax(0,1fr) auto;align-items:center;column-gap:13px;padding:11px 15px 11px 11px;border-radius:18px;background:var(--card);text-align:left;width:100%}
+.xd{display:flex;flex-direction:column;align-items:center;justify-content:center;width:46px;height:46px;border-radius:13px;background:var(--n242424);line-height:1}
+.xd b{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+.xd small{margin-top:3px;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--muted);letter-spacing:.04em}
+.xrow .xt b{display:block;font-size:16px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.xrow .xt small{display:block;margin-top:2px;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.xrow .xc{color:var(--nd1d1d6);font-size:13.5px;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+.xrow:active,.xhero:active{opacity:.75}
 .u-curso{display:flex;flex-direction:column;margin:4px 4px 0}
 .u-curso small{color:var(--muted);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
 .u-curso b{margin-top:2px;font-size:34px;line-height:1.1;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
@@ -566,6 +586,10 @@ input[type="date"].inp::-webkit-calendar-picker-indicator{filter:invert(1);opaci
 .prof .pt b{display:block;font-size:16px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .prof .pt small{display:block;margin-top:2px;color:var(--muted);font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .prof > svg{width:18px;height:18px;color:var(--faint)}
+.prof .pt small.pmail{color:var(--nd1d1d6);user-select:text;-webkit-user-select:text}
+.pcopy{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;flex:none;width:58px;height:50px;border-radius:13px;background:var(--n242424);color:var(--nffffff);font-size:11.5px;font-weight:600}
+.pcopy svg{width:18px;height:18px;stroke-width:2}
+.pcopy:active{background:var(--n2c2c2e)}
 .u-add{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:0 15px;border-radius:18px;box-shadow:inset 0 0 0 1.5px var(--n232323);color:var(--muted);font-size:15.5px}
 .u-add svg{width:19px;height:19px;stroke-width:2.2}
 .u-add:active{background:var(--n111111)}
@@ -977,7 +1001,7 @@ const ls = {
   set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } },
   ok(){ try { localStorage.setItem('miespacio.t', '1'); localStorage.removeItem('miespacio.t'); return true; } catch (e) { return false; } }
 };
-const APP_VER = '17 nov 2026';           // se enseña en Configuración para saber qué versión tiene cada dispositivo
+const APP_VER = '17 nov 2026 (2)';           // se enseña en Configuración para saber qué versión tiene cada dispositivo
 const K_CACHE = 'miespacio.cache.v1';   // copia de lo sincronizado, solo para abrir rápido
 const K_LOCAL = 'miespacio.local.v1';   // almacén principal en modo local
 
@@ -1304,7 +1328,7 @@ function syncChanged(){ syncListeners.forEach(f => f()); }
 // que solo conoce el script; aquí se guarda únicamente un token de sesión de este dispositivo.
 // SS imita la interfaz de la base de datos de claude.ai (doc, collection, set, delete, onSnapshot)
 // para reutilizar toda la lógica de la app.
-const SERVIDOR_URL = 'https://script.google.com/macros/s/AKfycbwpcgU7k0kZlHEZYuj61_GOAw0u5Ho9WV-8RFyvx5zvKHZ_l9vMyw4_fCT41qe2dRcW/exec';                      // dirección /exec del Apps Script (no es secreta)
+const SERVIDOR_URL = 'https://script.google.com/macros/s/AKfycbyLX104tPVWfU5GcilRYYsdtPMwOPo_jxHgaDNfpTFsMOgLN4_0GM9SpDvC9JtP8yd5/exec';                      // dirección /exec del Apps Script (no es secreta)
 const K_SRV = 'miespacio.servidor.v1';        // dirección pegada en este navegador, si no está arriba
 const K_SES = 'miespacio.sesion.v1';          // token de sesión de este dispositivo
 const K_HOJA = 'miespacio.hoja.v1';           // última copia de la hoja, para abrir rápido y sin conexión
@@ -1787,9 +1811,8 @@ function gridHTML(it){
   } else if (it.kind === 'media') { return mediaHTML(it, list);
   } else if (it.kind === 'split') { return splitHTML(it, list);
   } else if (it.kind === 'uni') {
-    const arr = list.filter(e => !e.t).sort((a, b) => b.updated - a.updated);
-    html = arr.map(noteHTML).join('');
-    hint = 'Mantén pulsado algo para editarlo, copiarlo o eliminarlo';
+    // Universidad ya no enseña notas sueltas ni enlaces (siguen guardados y salen en el buscador).
+    hint = '';
   } else if (it.kind === 'notes') {
     let arr = list.sort((a, b) => b.updated - a.updated);
     const q = norm(S.query.trim());
@@ -1819,7 +1842,7 @@ function renderFolder(){
   else if (isHab) { const h = habitsDoneToday(it.id); count = h.n ? (h.done === h.n ? 'Todo hecho hoy' : `${h.done} de ${h.n} hoy`) : 'Sin hábitos'; }
   else if (isMedia) { const p = list.filter(e => !e.dow).length, c = list.filter(e => e.dow === 1).length; count = list.length ? [p ? plural(p, 'pendiente', 'pendientes') : '', c ? `${c} en curso` : ''].filter(Boolean).join(' · ') || 'Todo terminado' : 'Nada apuntado'; }
   else if (isSplit) count = splitMine(it);
-  else if (isUni) count = cuatLabel(cuatNow());
+  else if (isUni) { const nx = uniNext(it); count = nx ? `Lo siguiente: ${relLabel(evDay0(nx)).toLowerCase()}` : cuatLabel(cuatNow()); }
   else count = countLabel(it.kind, list.length);
   const hic = $('#fIcon'), tv = tintVars(it.color);
   hic.innerHTML = svg(it.icon); hic.className = 'hic' + (tv ? ' tint' : ''); hic.style.cssText = tv;
@@ -1858,7 +1881,7 @@ function openFolder(id){
   const it = S.home.items[id];
   if (!it || !hasEntries(it.kind)) return;
   if (G.id) { const back = groupOf(id) ? G.id : null; closeGroup(); G.back = back; }
-  if (it.kind === 'uni') Sched.cuat = cuatNow();
+  if (it.kind === 'uni') { Cal.maybe(); Sched.cuat = cuatNow(); }
   S.folder = id; S.query = ''; $('#fQuery').value = ''; $('#fClear').hidden = true;
   if (S.editing) S.editing = null;
   S.moneyMonth = curYM();
@@ -2123,7 +2146,7 @@ function createMenu(){
   actionSheet({ title: 'Añadir', actions: [
     { icon: 'layers', label: 'Carpeta', sub: 'Agrupa varias tarjetas del inicio en una', run: () => openGroupForm() },
     { icon: 'calendar-days', label: 'Widget de calendario', sub: 'Lo que tienes hoy en Google Calendar', run: addCalWidget },
-    { icon: 'graduation-cap', label: 'Universidad', sub: 'Horario por cuatrimestres, apuntes, profesores y enlaces', run: () => openItemForm({ kind: 'uni' }) },
+    { icon: 'graduation-cap', label: 'Universidad', sub: 'Exámenes, horario por cuatrimestres, apuntes y profesores', run: () => openItemForm({ kind: 'uni' }) },
     { icon: 'flame', label: 'Hábitos', sub: 'Márcalos cada día y mantén la racha', run: () => openItemForm({ kind: 'habits' }) },
     { icon: 'film', label: 'Por ver y por leer', sub: 'Películas, series, libros y cursos, con tu nota', run: () => openItemForm({ kind: 'media' }) },
     { icon: 'users', label: 'Gastos compartidos', sub: 'Quién ha pagado qué y quién debe a quién', run: () => openItemForm({ kind: 'split' }) },
@@ -2253,7 +2276,7 @@ function openItemForm({ id = null, kind = 'notes', preset = null } = {}){
     saveHome();
     sh.close();
     render();
-    if (created) { setTimeout(() => revealTile(created), 60); if (st.kind === 'split') setTimeout(() => { openFolder(created); setTimeout(() => splitPeople(created), 450); }, 500); }
+    if (created) { setTimeout(() => revealTile(created), 60); if (st.kind === 'uni') Cal.refresh(true); if (st.kind === 'split') setTimeout(() => { openFolder(created); setTimeout(() => splitPeople(created), 450); }, 500); }
   });
   upd();
 }
@@ -2879,6 +2902,11 @@ function tileMeta(it){
   if (it.kind === 'split') {
     const b = splitCalc(it).bal[ME] || 0;
     return b ? `<span class="meta">${b > 0 ? '+' : '−'}${esc(money0(Math.abs(b)))}</span>` : '';
+  }
+  if (it.kind === 'uni') {
+    const nx = uniNext(it); if (!nx) return '';
+    const n = relDays(evDay0(nx));
+    return n <= 30 ? `<span class="meta">${n <= 0 ? 'Hoy' : n === 1 ? 'Mañana' : 'en ' + n + ' d'}</span>` : '';
   }
   return '';
 }
@@ -3551,8 +3579,8 @@ const Cal = {
   data: null, state: 'idle', busy: false, lastTry: 0, msg: '',
   init(){ const d = ls.get(K_CAL); if (d && d.ok && Array.isArray(d.ev)) this.data = d; },
   usable(){ return P.db === SS && !!SS.token() && !SS.authFailed; },
-  unis(){ return []; },   // Universidad ya no lee Google Calendar (solo tus clases)
-  wanted(){ return Object.values(S.home.items).some(i => i.kind === 'cal'); },
+  unis(){ return [...new Set(Object.values(S.home.items).filter(i => i.kind === 'uni').map(i => i.calName || 'Universidad'))].slice(0, 5); },
+  wanted(){ return Object.values(S.home.items).some(i => i.kind === 'cal' || i.kind === 'uni'); },
   async refresh(force){
     if (!this.usable() || this.busy) return;
     if (!force && (!this.wanted() || Date.now() - this.lastTry < 60000)) return;
@@ -3659,10 +3687,67 @@ function addCalWidget(){
 }
 
 /* ================= universidad ================= */
-// Arriba, el curso; debajo, el horario de cada cuatrimestre (solo tus clases, sin Google Calendar),
-// dónde están los apuntes, enlaces, profesores y notas.
+// Arriba, el curso y lo próximo del calendario «Universidad» de Google Calendar (exámenes, con cuenta atrás);
+// debajo, el horario de cada cuatrimestre (solo tus clases), dónde están los apuntes, enlaces, profesores y notas.
 let lastUni = '';
 const uniEntries = (fid, t) => folderEntries(fid).filter(e => e.t === t);
+function uniCal(it){
+  const u = Cal.data && Cal.data.uni && Cal.data.uni[it.calName || 'Universidad'];
+  return u || null;
+}
+function uniNext(it){ const u = uniCal(it); return u && u.found && u.ev && u.ev.length ? u.ev.find(ev => evDay1(ev) >= todayStr()) || null : null; }
+function examWhen(ev){ const d = evDay0(ev); return fullDay(d) + (ev.all ? '' : ' · ' + hm(ev.s)); }
+function examsHTML(it){
+  const cname = it.calName || 'Universidad', tv = tintVars(it.color);
+  let h = `<div class="u-sec"><h3>Próximos exámenes</h3><button type="button" data-act="ucal" aria-label="Elegir calendario">${esc(cname)}${svg('chevron-right')}</button></div>`;
+  const st = calStatus();
+  if (st) return h + `<div class="u-msg"><b>${esc(st.msg)}</b><br>${esc(st.sub)}</div>`;
+  const u = uniCal(it);
+  if (!u) return h + `<div class="u-msg">${Cal.busy ? 'Buscando tu calendario…' : `Pulsa actualizar para buscar el calendario «${esc(cname)}».`}${Cal.busy ? '' : '<br><button class="pill" type="button" data-act="urefresh">Actualizar</button>'}</div>`;
+  if (!u.found) return h + `<div class="u-msg">No encuentro un calendario llamado <b>«${esc(cname)}»</b> en tu Google Calendar.<br><button class="pill" type="button" data-act="ucal">Elegir calendario</button></div>`;
+  const list = (u.ev || []).filter(ev => evDay1(ev) >= todayStr());
+  if (!list.length) return h + `<div class="u-msg">No hay nada próximo en <b>«${esc(u.name)}»</b>. Cuando añadas exámenes o entregas en ese calendario, aparecerán aquí.</div>`;
+  const x = list[0], n = Math.max(0, relDays(evDay0(x)));
+  h += `<button type="button" class="xhero${tv ? ' tint' : ''}"${tv ? ` style="${tv}"` : ''} data-ev="0"><span class="xh-k">Lo siguiente</span><span class="xh-row"><span class="xh-t"><b>${esc(x.t || '(Sin título)')}</b><small>${esc(examWhen(x))}${x.loc ? '<br>' + esc(x.loc) : ''}</small></span><span class="xh-n">${n === 0 ? '<b>Hoy</b>' : `<b>${n}</b><small>${n === 1 ? 'día' : 'días'}</small>`}</span></span></button>`;
+  if (list.length > 1) h += `<div class="xlist">${list.slice(1, 25).map((ev, i) => { const d = parseDay(evDay0(ev)); return `<button type="button" class="xrow" data-ev="${i + 1}"><span class="xd"><b>${d.getDate()}</b><small>${MONTHS_S[d.getMonth()]}</small></span><span class="xt"><b>${esc(ev.t || '(Sin título)')}</b><small>${esc([cap(WEEKDAYS[d.getDay()]), ev.all ? '' : hm(ev.s), ev.loc].filter(Boolean).join(' · '))}</small></span><span class="xc">${esc(relLabel(evDay0(ev)).replace('En ', 'en ').replace(' días', ' d'))}</span></button>`; }).join('')}</div>`;
+  return h;
+}
+function examSheet(it, i){
+  const u = uniCal(it); if (!u || !u.ev) return;
+  const list = u.ev.filter(ev => evDay1(ev) >= todayStr()), ev = list[i]; if (!ev) return;
+  const lists = Object.values(S.home.items).filter(x => x.kind === 'list');
+  const d = parseDay(evDay0(ev));
+  const text = `${ev.t || 'Examen'} · ${examWhen(ev)}${ev.loc ? ' · ' + ev.loc : ''}`;
+  const sh = makeSheet(`<div class="grab"></div><div class="sh-head"><span${tintAttr(it.color, 'shic')}>${svg('graduation-cap')}</span><div class="sh-ht"><div class="sh-title">${esc(ev.t || '(Sin título)')}</div><div class="sh-sub">${esc(relLabel(evDay0(ev)))}</div></div></div>
+    <div class="fbody">
+      <div class="info"><div class="row">${svg('calendar')}<span class="iv"><small>Cuándo</small>${esc(examWhen(ev))}${ev.all ? '' : ' – ' + esc(hm(ev.e))}</span></div>${ev.loc ? `<div class="row">${svg('map-pin')}<span class="iv"><small>Dónde</small>${esc(ev.loc)}</span></div>` : ''}${ev.desc ? `<div class="row">${svg('file-text')}<span class="iv"><small>Detalles</small>${esc(ev.desc)}</span></div>` : ''}</div>
+      <div class="btnrow"><button type="button" id="exCopy">${svg('copy')}Copiar</button>${lists.length ? `<button type="button" id="exTodo">${svg('list-checks')}A ${esc(lists[0].name)}</button>` : ''}<a href="https://calendar.google.com/calendar/r/day/${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}" target="_blank" rel="noopener noreferrer">${svg('external-link')}Ver en Google</a></div>
+      <p class="foot">Viene de tu calendario «${esc(u.name)}». Para cambiarlo, edítalo en Google Calendar.</p>
+    </div>`, 'tall');
+  $('#exCopy', sh.el).addEventListener('click', () => copyAndTell(text));
+  const td = $('#exTodo', sh.el);
+  if (td) td.addEventListener('click', () => {
+    if (!canWrite()) return;
+    const L = lists[0], now = Date.now();
+    let min = Infinity; for (const e of folderEntries(L.id)) if (e.pos < min) min = e.pos;
+    const e = { id: newId(), folder: L.id, title: `Estudiar: ${ev.t || 'examen'} (${d.getDate()} ${MONTHS_S[d.getMonth()]})`.slice(0, 300), body: '', pos: (Number.isFinite(min) ? min : 1000) - 1000, created: now, updated: now };
+    S.entries.set(e.id, e); saveEntry(e); scheduleRender();
+    sh.close(); toast(`Añadido a ${L.name}`, 'check');
+  });
+}
+function chooseUniCal(it){
+  if (!canWrite()) return;
+  const names = Cal.data && Array.isArray(Cal.data.cals) ? Cal.data.cals : [];
+  if (!names.length) {
+    toast(Cal.usable() ? 'Cargando tus calendarios…' : 'Disponible en la versión conectada a Google', 'info');
+    if (Cal.usable()) Cal.refresh(true);
+    return;
+  }
+  actionSheet({ title: 'Calendario de la universidad', sub: 'Lo que tenga se muestra arriba', icon: 'calendar-days', actions: names.map(n => ({ icon: n === it.calName ? 'circle-check' : 'calendar', label: n, run: () => {
+    if (!canWrite() || !S.home.items[it.id]) return;
+    S.home.items[it.id].calName = n; saveHome(); lastUni = ''; renderFolder(); Cal.refresh(true);
+  } })) });
+}
 const initials = s => String(s || '?').replace(/^(dr|dra|prof|profa)\.?\s+/i, '').trim().split(/\s+/).slice(0, 2).map(w => w.charAt(0)).join('').toUpperCase() || '?';
 // Curso y cuatrimestre por la fecha: de agosto a enero, 1.er cuatrimestre; de febrero a julio, 2.º.
 // El curso cambia en agosto (noviembre de 2026 → curso 2026-27). Codigo.gs usa la misma regla para Siri.
@@ -3676,6 +3761,7 @@ const apSite = e => AP_SITES.find(s => s.k === e.cat) || AP_SITES[2];
 function uniHTML(it){
   const fid = it.id, cur = cuatNow(), vc = Sched.cuat === '2' ? '2' : '1';
   let h = `<div class="u-curso"><small>Curso</small><b>${esc(cursoNow())}</b><span>Ahora: ${esc(cuatLabel(cur))}</span></div>`;
+  h += examsHTML(it);
   h += `<div class="u-sec"><h3>Horario</h3><span>${plural(allClasses(vc).length, 'clase', 'clases')}</span></div>`;
   h += `<div class="seg cuat" role="group" aria-label="Cuatrimestre">${['1', '2'].map(c => `<button type="button" data-cuat="${c}" aria-pressed="${c === vc}">${c === '1' ? '1.er' : '2.º'} cuatri</button>`).join('')}</div>`;
   h += schedHTML(it, vc);
@@ -3684,15 +3770,11 @@ function uniHTML(it){
   h += `<div class="u-sec"><h3>Apuntes</h3><span>${aps.length ? AP_SITES.map(s => { const n = aps.filter(e => apSite(e).k === s.k).length; return n ? `${esc(s.l)}: ${n}` : ''; }).filter(Boolean).join(' · ') : ''}</span></div>`;
   if (aps.length) h += `<div class="aps">${aps.map(e => `<div class="ap" data-ap="${esc(e.id)}"><div class="ap-h"><b>${esc(e.title || 'Sin nombre')}</b><button type="button" data-apm aria-label="Más opciones">${svg('ellipsis')}</button></div><div class="seg ap-seg" role="group" aria-label="Dónde están">${AP_SITES.map(s => `<button type="button" data-site="${s.k}" aria-pressed="${apSite(e).k === s.k}">${svg(s.ic)}<span>${esc(s.l)}</span></button>`).join('')}</div></div>`).join('')}</div>`;
   h += `<button type="button" class="u-add" data-act="uapunte" style="margin-top:8px">${svg('plus')}<span>${aps.length ? 'Añadir apuntes' : 'Apunta dónde tienes los apuntes de cada asignatura'}</span></button>`;
-  const links = uniEntries(fid, 'link').sort(snipSort);
-  h += `<div class="u-sec"><h3>Enlaces</h3></div><div class="chips">${links.map(e => { const u = safeUrl(e.url); return `<div class="cell" data-id="${esc(e.id)}"><a class="ulink" href="${esc(u || '#')}"${isWeb(u) ? ' target="_blank" rel="noopener noreferrer"' : ''} draggable="false">${svg('link')}<span>${esc(e.title || u)}</span></a></div>`; }).join('')}<button type="button" class="ulink add" data-act="ulink">${svg('plus')}<span>${links.length ? 'Añadir' : 'Añadir enlace (ej. Enseñanza Virtual)'}</span></button></div>`;
+  // Profesores: nombre, asignatura y el correo a la vista, con un botón para copiarlo.
   const profs = uniEntries(fid, 'prof').sort((a, b) => a.title.localeCompare(b.title, 'es'));
   h += `<div class="u-sec"><h3>Profesores</h3><span>${profs.length || ''}</span></div>`;
-  if (profs.length) h += `<div class="profs">${profs.map(e => `<div class="cell" data-id="${esc(e.id)}"><div class="prof" role="button" tabindex="0"><span${tintAttr(it.color, 'av')}>${esc(initials(e.title))}</span><span class="pt"><b>${esc(e.title || 'Sin nombre')}</b><small>${esc([e.subj, e.room].filter(Boolean).join(' · ') || e.mail || 'Toca para ver los datos')}</small></span>${svg('chevron-right')}</div></div>`).join('')}</div>`;
+  if (profs.length) h += `<div class="profs">${profs.map(e => { const mail = e.mail.trim(); return `<div class="cell" data-id="${esc(e.id)}"><div class="prof" role="button" tabindex="0"><span${tintAttr(it.color, 'av')}>${esc(initials(e.title))}</span><span class="pt"><b>${esc(e.title || 'Sin nombre')}</b>${e.subj || e.room ? `<small>${esc([e.subj, e.room].filter(Boolean).join(' · '))}</small>` : ''}<small class="pmail">${mail ? esc(mail) : 'Sin correo · toca para añadirlo'}</small></span>${mail ? `<button type="button" class="pcopy" data-mail="${esc(mail)}" aria-label="Copiar el correo de ${esc(e.title)}">${svg('copy')}<span>Copiar</span></button>` : svg('chevron-right')}</div></div>`; }).join('')}</div>`;
   h += `<button type="button" class="u-add" data-act="uprof" style="margin-top:8px">${svg('plus')}<span>Añadir profesor</span></button>`;
-  const nn = uniEntries(fid, '').length;
-  h += `<div class="u-sec u-notes-h"><h3>Notas</h3><button type="button" data-act="unote">${svg('plus')}Nueva</button></div>`;
-  if (!nn) h += `<button type="button" class="u-add" data-act="unote">${svg('notepad-pen')}<span>Apuntes, horarios, lo que quieras</span></button>`;
   return h;
 }
 function renderUni(it){
@@ -3858,15 +3940,16 @@ function uniEntryActions(id){
 }
 function uniAddMenu(){
   actionSheet({ title: 'Añadir', actions: [
-    { icon: 'notepad-pen', label: 'Nota', sub: 'Apuntes, horarios, lo que quieras', run: newNote },
     { icon: 'book-open', label: 'Clase', sub: `Al horario del ${cuatLabel(Sched.cuat)}`, run: () => openClassForm() },
     { icon: 'backpack', label: 'Apuntes', sub: 'Casa mamá, casa papá o mochila', run: () => openApunteForm() },
     { icon: 'user', label: 'Profesor', sub: 'Correo, despacho y tutorías', run: () => openProfForm() },
-    { icon: 'link', label: 'Enlace', sub: 'Enseñanza Virtual, horarios, apuntes…', run: () => openUniLinkForm() },
   ]});
 }
 function uniMenu(it){
   actionSheet({ title: it.name, sub: 'Universidad', icon: it.icon, actions: [
+    { icon: 'calendar-days', label: 'Elegir calendario', sub: `Exámenes de «${it.calName || 'Universidad'}»`, run: () => chooseUniCal(it) },
+    { icon: 'refresh-cw', label: 'Actualizar exámenes', run: () => { if (Cal.usable()) { Cal.refresh(true); toast('Actualizando…', 'refresh-cw'); } else toast('Disponible en la versión conectada a Google', 'info'); } },
+    { sep: true },
     { icon: 'book-open', label: 'Añadir clase', sub: `Al horario del ${cuatLabel(Sched.cuat)}`, run: () => openClassForm() },
     { icon: 'backpack', label: 'Añadir apuntes', run: () => openApunteForm() },
     { sep: true },
@@ -3880,13 +3963,17 @@ function bindUni(){
     const a = e.target.closest('[data-act]');
     if (a) {
       const k = a.dataset.act;
-      if (k === 'uclass') openClassForm();
+      if (k === 'ucal') chooseUniCal(it);
+      else if (k === 'urefresh') Cal.refresh(true);
+      else if (k === 'uclass') openClassForm();
       else if (k === 'uapunte') openApunteForm();
       else if (k === 'ulink') openUniLinkForm();
       else if (k === 'uprof') openProfForm();
       else if (k === 'unote') newNote();
       return;
     }
+    const pc = e.target.closest('.pcopy'); if (pc) { copyAndTell(pc.dataset.mail, 'Correo copiado'); return; }
+    const x = e.target.closest('[data-ev]'); if (x) { examSheet(it, +x.dataset.ev); return; }
     const cq = e.target.closest('[data-cuat]'); if (cq) { if (Sched.cuat !== cq.dataset.cuat) { Sched.cuat = cq.dataset.cuat; lastUni = ''; renderFolder(); } return; }
     const ap = e.target.closest('[data-ap]');
     if (ap) {

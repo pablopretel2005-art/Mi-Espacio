@@ -7,7 +7,14 @@
  * Todo se hace desde el menú «Mi espacio» de la hoja (no con el botón Ejecutar del editor):
  *   1. Preparar la hoja
  *   2. Poner o cambiar la contraseña
- *   3. Conectar Google Calendar (da permiso para LEER tu calendario: widget de hoy y exámenes)
+ *   3. Conectar Google Calendar (da permiso para leer tu calendario —widget de hoy y exámenes— y para
+ *      crear en él los exámenes que se apunten en la pestaña «añadir»)
+ *   4. Preparar la pestaña «añadir»
+ *
+ * Pestaña «añadir»: la forma fácil de meter cosas desde fuera (a mano o con otra IA conectada a
+ * Google Sheets) sin tocar «datos». Se escribe una fila (examen, profesor, clase, apuntes,
+ * recordatorio, gasto o nota) y el servidor la pasa a la app la próxima vez que un dispositivo se
+ * sincroniza. La pestaña «cómo añadir» explica qué rellenar en cada tipo.
  *
  * Atajos de Siri: la app crea una clave aparte (Configuración → Atajos de Siri) que solo sirve
  * para añadir gastos, hábitos, recordatorios y notas, y para preguntar por tu agenda (hoy, mañana,
@@ -37,6 +44,8 @@ function onOpen() {
     .addItem('1. Preparar la hoja', 'prepararHoja')
     .addItem('2. Poner o cambiar la contraseña', 'ponerContrasena')
     .addItem('3. Conectar Google Calendar', 'conectarCalendario')
+    .addItem('4. Preparar la pestaña «añadir»', 'prepararBandeja')
+    .addItem('Pasar ahora lo de «añadir» a la app', 'pasarBandeja')
     .addSeparator()
     .addItem('Ver dispositivos conectados', 'verSesiones')
     .addItem('Cerrar todas las sesiones', 'cerrarSesiones')
@@ -239,6 +248,7 @@ function iguales_(a, b) {
 
 // Devuelve lo que ha cambiado desde la revisión «since» (o todo, si hace falta).
 function pull_(req) {
+  try { procesarBandeja_(); } catch (e) {}   // lo que haya en «añadir» entra antes de mirar los cambios
   const props = PropertiesService.getScriptProperties();
   const rev = Number(props.getProperty('REV') || 0);
   const desde = Number(props.getProperty('COMPLETO_DESDE') || 0);
@@ -344,7 +354,8 @@ function validar_(c) {
   return null;
 }
 
-/* ================= Google Calendar (solo lectura) ================= */
+/* ================= Google Calendar ================= */
+// Se lee para el widget de hoy y los exámenes. Solo se escribe para crear los exámenes de la pestaña «añadir».
 
 // Eventos de hoy y los próximos días de todos tus calendarios visibles, y lo próximo de los
 // calendarios de la universidad. Se guarda 2 minutos en caché para no leer el calendario en cada consulta.
@@ -355,7 +366,8 @@ function calendario_(req) {
   const tz = Session.getScriptTimeZone();
   const hoy = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
   const cache = CacheService.getScriptCache();
-  const clave = 'cal_' + huella_(JSON.stringify([hoy, dias, atras, unis])).slice(0, 40);
+  // «calv» cambia al crear un examen desde «añadir», para no servir la copia de antes
+  const clave = 'cal_' + huella_(JSON.stringify([hoy, dias, atras, unis, cache.get('calv') || ''])).slice(0, 40);
   const guardado = cache.get(clave);
   if (guardado) { try { return JSON.parse(guardado); } catch (e) {} }
 
@@ -753,6 +765,213 @@ function atajoMes_(req, d) {
   if (n > 1 && mayor) t += ' Donde más, en ' + mayor.replace('super', 'súper') + ': ' + euros_(porCat[mayor]) + '.';
   if (f.budget) { const q = f.budget - total; t += q >= 0 ? ' Te quedan ' + euros_(q) + ' del presupuesto.' : ' Te has pasado del presupuesto en ' + euros_(-q) + '.'; }
   return t;
+}
+
+/* ================= pestaña «añadir» ================= */
+// Para meter cosas en la app desde la hoja (a mano o con otra IA) sin tocar «datos»:
+// cada fila es una cosa nueva. Cuando un dispositivo se sincroniza (o con el menú
+// «Pasar ahora lo de «añadir» a la app»), el servidor la guarda como lo haría la app y
+// escribe en «estado» «✓ …» si ha ido bien o «✗ …» con el motivo. Las filas con estado no se repiten.
+
+const BANDEJA = 'añadir';
+const AYUDA = 'cómo añadir';
+const COLS_B = ['tipo', 'nombre', 'asignatura', 'día', 'hora', 'hasta', 'lugar', 'correo', 'teléfono', 'dónde', 'cuatrimestre', 'importe', 'notas', 'estado'];
+const TIPOS_B = ['examen', 'profesor', 'clase', 'apuntes', 'recordatorio', 'gasto', 'nota'];
+const AYUDA_FILAS = [
+  ['tipo', 'Qué columnas rellenar', 'Qué pasa', 'Ejemplo'],
+  ['examen', 'nombre · día (fecha, 18/11/2026; también «hoy» o «mañana») · hora y hasta (opcionales) · lugar · asignatura y notas (opcionales)', 'Se crea en tu Google Calendar de Universidad y sale en «Próximos exámenes» con la cuenta atrás. Si ya hay uno igual ese día, no se repite.', 'nombre: Parcial de Física · día: 18/11/2026 · hora: 10:00 · hasta: 12:00 · lugar: Aula 1.3'],
+  ['profesor', 'nombre · asignatura · correo · teléfono · lugar (despacho) · notas (tutorías)', 'Se añade a Profesores. Si ya hay un profesor con ese nombre, se actualizan los datos que pongas.', 'nombre: María López · asignatura: Física · correo: mlopez@us.es · lugar: Edificio L, 2.14'],
+  ['clase', 'nombre (asignatura) · día (lunes a viernes) · hora · hasta · lugar (aula) · cuatrimestre (1 o 2; si no se pone, 1)', 'Se añade al horario de ese cuatrimestre, cada semana.', 'nombre: Cálculo · día: martes · hora: 11:00 · hasta: 13:00 · cuatrimestre: 1'],
+  ['apuntes', 'nombre (asignatura) · dónde (mamá, papá o mochila)', 'Se añaden a Apuntes. Si ya existen, se cambian de sitio.', 'nombre: Física · dónde: mochila'],
+  ['recordatorio', 'nombre (lo que hay que hacer)', 'Se añade a Recordatorios.', 'nombre: Imprimir la práctica 2'],
+  ['gasto', 'nombre (concepto) · importe (en euros)', 'Se apunta en Finanzas con fecha de hoy.', 'nombre: Fotocopias · importe: 3,50'],
+  ['nota', 'nombre (título) · notas (el texto)', 'Se guarda en Notas.', 'nombre: Ideas TFG · notas: …'],
+  ['', '', '', ''],
+  ['Reglas', 'Una fila por cosa. Deja «estado» vacío: lo rellena el servidor (✓ añadido o ✗ y el motivo). No edites la pestaña «datos».', 'Pasa a la app la próxima vez que se abra o se sincronice. Para hacerlo ya: menú Mi espacio > Pasar ahora lo de «añadir» a la app.', ''],
+];
+
+function prepararBandeja() {
+  const ss = SpreadsheetApp.getActive();
+  let sh = ss.getSheetByName(BANDEJA);
+  if (!sh) sh = ss.insertSheet(BANDEJA);
+  sh.getRange(1, 1, 1, COLS_B.length).setValues([COLS_B]).setFontWeight('bold');
+  sh.setFrozenRows(1);
+  sh.getRange(2, 1, Math.max(1, sh.getMaxRows() - 1), COLS_B.length).setNumberFormat('@');   // todo como texto: fechas y horas tal cual
+  sh.getRange(2, 1, Math.max(1, sh.getMaxRows() - 1), 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(TIPOS_B, true).setAllowInvalid(true).build());
+  sh.setColumnWidth(2, 220); sh.setColumnWidth(COLS_B.length, 320);
+  let ay = ss.getSheetByName(AYUDA);
+  if (!ay) ay = ss.insertSheet(AYUDA);
+  ay.clear();
+  ay.getRange(1, 1, AYUDA_FILAS.length, 4).setValues(AYUDA_FILAS).setWrap(true).setVerticalAlignment('top');
+  ay.getRange(1, 1, 1, 4).setFontWeight('bold');
+  ay.setColumnWidth(1, 110); ay.setColumnWidth(2, 380); ay.setColumnWidth(3, 380); ay.setColumnWidth(4, 380);
+  SpreadsheetApp.getUi().alert('Pestaña «añadir» lista',
+    'Escribe una fila por cosa (examen, profesor, clase, apuntes, recordatorio, gasto o nota). En «cómo añadir» está qué rellenar en cada tipo.\n\n' +
+    'Se pasa a la app la próxima vez que se sincronice. Deja «estado» vacío.',
+    SpreadsheetApp.getUi().ButtonSet.OK);
+}
+
+function pasarBandeja() {
+  const r = procesarBandeja_();
+  SpreadsheetApp.getUi().alert(r.vistas ? 'Hecho: ' + r.ok + ' de ' + r.vistas + ' filas añadidas. Mira la columna «estado».' : 'No había filas nuevas en «añadir».');
+}
+
+// Pasa a la app las filas de «añadir» que aún no tienen estado (como mucho 25 cada vez).
+function procesarBandeja_() {
+  const out = { vistas: 0, ok: 0 };
+  const sh = SpreadsheetApp.getActive().getSheetByName(BANDEJA);
+  if (!sh || sh.getLastRow() < 2) return out;
+  const lock = LockService.getDocumentLock();   // distinto del de push_: así no se pisan dos sincronizaciones
+  if (!lock.tryLock(8000)) return out;
+  try {
+    const ancho = Math.max(sh.getLastColumn(), COLS_B.length);
+    const cab = sh.getRange(1, 1, 1, ancho).getDisplayValues()[0].map(c => sinAcentos_(c).replace(/[^a-z]/g, ''));
+    const col = n => cab.indexOf(n);
+    const cTipo = col('tipo'), cEstado = col('estado');
+    if (cTipo < 0 || cEstado < 0) return out;
+    const filas = sh.getRange(2, 1, sh.getLastRow() - 1, ancho).getDisplayValues();
+    const tz = Session.getScriptTimeZone();
+    for (let r = 0; r < filas.length && out.vistas < 25; r++) {
+      const f = filas[r];
+      if (!String(f[cTipo]).trim() || String(f[cEstado]).trim()) continue;
+      const x = {};
+      cab.forEach((n, i) => { if (n) x[n] = String(f[i] == null ? '' : f[i]).trim(); });
+      out.vistas++;
+      let res;
+      try { res = filaBandeja_(x); } catch (e) { res = '✗ Ha fallado: ' + String(e && e.message || e).slice(0, 150); }
+      if (res.charAt(0) === '✓') out.ok++;
+      sh.getRange(r + 2, cEstado + 1).setValue(res + ' (' + Utilities.formatDate(new Date(), tz, 'dd/MM HH:mm') + ')');
+    }
+    SpreadsheetApp.flush();
+  } finally { lock.releaseLock(); }
+  return out;
+}
+
+function filaBandeja_(x) {
+  // se acepta en singular o plural, con o sin tilde: «examen», «exámenes», «apunte», «apuntes»…
+  const T = sinAcentos_(x.tipo);
+  const tipo = T === 'apunte' ? 'apuntes' : TIPOS_B.find(t => T === t || T === t + 's' || T === t + 'es') || T;
+  const nombre = limpio_(x.nombre, 120);
+  const d = estado_();
+  const uni = carpeta_(d, 'uni', '', 'universidad');
+  const conUni = f => uni ? f() : '✗ No tienes la sección Universidad. Créala en la app con el botón +.';
+  if (tipo === 'examen') return examenBandeja_(x, nombre, uni);
+  if (tipo === 'profesor') return conUni(() => profesorBandeja_(x, nombre, d, uni));
+  if (tipo === 'clase') return conUni(() => claseBandeja_(x, nombre, d, uni));
+  if (tipo === 'apuntes') return conUni(() => apuntesBandeja_(x, nombre, d, uni));
+  if (tipo === 'recordatorio') return marca_(atajoRecordatorio_({ texto: nombre }, d), /^Añadid/);
+  if (tipo === 'gasto') return marca_(atajoGasto_({ importe: x.importe, concepto: nombre }, d), /^Apuntado/);
+  if (tipo === 'nota') return marca_(atajoNota_({ titulo: nombre, texto: x.notas || nombre }, d), /^Nota guardada/);
+  return '✗ No conozco el tipo «' + limpio_(x.tipo, 30) + '». Usa: ' + TIPOS_B.join(', ') + '.';
+}
+function marca_(t, bien) { return (bien.test(t) ? '✓ ' : '✗ ') + t; }
+
+function examenBandeja_(x, nombre, uni) {
+  if (!nombre) return '✗ Falta el nombre del examen.';
+  const dia = fechaDe_(x.dia);
+  if (!dia) return '✗ No entiendo el día. Escríbelo así: 18/11/2026.';
+  const hs = horaDe_(x.hora), he = horaDe_(x.hasta);
+  if (x.hora && !hs) return '✗ No entiendo la hora. Escríbela así: 10:00.';
+  const nombreCal = (uni && uni.calName) || 'Universidad';
+  let cal;
+  try { cal = buscarCalendario_(calendarios_(), nombreCal); }
+  catch (e) { return '✗ Falta el permiso de Google Calendar. En la hoja: menú Mi espacio > 3. Conectar Google Calendar.'; }
+  if (!cal) return '✗ No encuentro el calendario «' + nombreCal + '» en tu Google Calendar.';
+  const tz = Session.getScriptTimeZone();
+  const asig = limpio_(x.asignatura, 80);
+  const titulo = asig && sinAcentos_(nombre).indexOf(sinAcentos_(asig)) < 0 ? nombre + ' · ' + asig : nombre;
+  const mediodia = Utilities.parseDate(dia + ' 12:00', tz, 'yyyy-MM-dd HH:mm');
+  if (cal.getEventsForDay(mediodia).some(e => sinAcentos_(e.getTitle()) === sinAcentos_(titulo))) return '✓ Ya estaba en tu calendario: ' + titulo + ', ' + fechaLarga_(dia) + '.';
+  const opc = {};
+  if (x.lugar) opc.location = limpio_(x.lugar, 160);
+  if (x.notas) opc.description = String(x.notas).slice(0, 2000);
+  try {
+    if (hs) {
+      const ini = Utilities.parseDate(dia + ' ' + hs, tz, 'yyyy-MM-dd HH:mm');
+      const fin = he && he > hs ? Utilities.parseDate(dia + ' ' + he, tz, 'yyyy-MM-dd HH:mm') : new Date(ini.getTime() + 2 * 3600e3);
+      cal.createEvent(titulo, ini, fin, opc);
+    } else cal.createAllDayEvent(titulo, mediodia, opc);
+  } catch (e) {
+    return '✗ No he podido crearlo en Google Calendar. Da permiso en la hoja: menú Mi espacio > 3. Conectar Google Calendar.';
+  }
+  CacheService.getScriptCache().put('calv', String(Date.now()), 21600);
+  return '✓ Examen añadido a «' + cal.getName() + '»: ' + titulo + ', ' + fechaLarga_(dia) + (hs ? ' a las ' + hs : '') + '.';
+}
+
+function profesorBandeja_(x, nombre, d, uni) {
+  if (!nombre) return '✗ Falta el nombre del profesor.';
+  const ya = d.entradas.find(e => e.j.folder === uni.id && e.j.t === 'prof' && sinAcentos_(e.j.title) === sinAcentos_(nombre));
+  const ahora = Date.now();
+  const j = ya ? Object.assign({}, ya.j) : { folder: uni.id, t: 'prof', title: nombre, body: '', pos: siguientePos_(d, uni.id), created: ahora };
+  const pon = (campo, v, max) => { v = limpio_(v, max); if (v) j[campo] = v; };
+  pon('subj', x.asignatura, 120); pon('mail', x.correo, 200); pon('ph', x.telefono, 40); pon('room', x.lugar, 120);
+  if (x.notas) j.hours = String(x.notas).slice(0, 600);
+  j.updated = ahora;
+  if (!guardar_([{ k: 'e:' + (ya ? ya.id : nuevoId_()), b: ya ? ya.ver : 0, t: ahora, j: j }])) return '✗ No se ha podido guardar. Se intentará otra vez si borras el estado.';
+  return '✓ ' + (ya ? 'Profesor actualizado: ' : 'Profesor añadido: ') + nombre + (j.mail ? ' (' + j.mail + ')' : '') + '.';
+}
+
+const DIAS_SEMANA_ = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+function claseBandeja_(x, nombre, d, uni) {
+  if (!nombre) return '✗ Falta la asignatura (columna «nombre»).';
+  const n = sinAcentos_(x.dia);
+  const dow = /^[1-5]$/.test(n) ? Number(n) : n.length >= 3 ? DIAS_SEMANA_.findIndex(s => s.indexOf(n.slice(0, 3)) === 0) + 1 : 0;
+  if (!dow) return '✗ El día de una clase tiene que ser de lunes a viernes.';
+  const hs = horaDe_(x.hora), he = horaDe_(x.hasta);
+  if (!hs || !he || he <= hs) return '✗ Faltan las horas, o «hasta» no es después de «hora». Escríbelas así: 11:00 y 13:00.';
+  const cuat = String(x.cuatrimestre || '').indexOf('2') >= 0 ? '2' : '1';
+  const clases = d.entradas.filter(e => e.j.folder === uni.id && e.j.t === 'class');
+  if (clases.some(e => sinAcentos_(e.j.title) === sinAcentos_(nombre) && e.j.dow === dow && e.j.hs === hs && (e.j.cat === '2' ? '2' : '1') === cuat)) return '✓ Esa clase ya estaba en el horario.';
+  const misma = clases.find(e => sinAcentos_(e.j.title) === sinAcentos_(nombre) && e.j.col);   // mismo color que el resto de esa asignatura
+  const ahora = Date.now();
+  const j = { folder: uni.id, t: 'class', title: nombre.slice(0, 80), body: String(x.notas || '').slice(0, 2000), pos: 0, created: ahora, updated: ahora, dow: dow, hs: hs, he: he, cat: cuat };
+  if (x.lugar) j.room = limpio_(x.lugar, 120);
+  if (misma) j.col = misma.j.col;
+  if (!guardar_([{ k: 'e:' + nuevoId_(), b: 0, t: ahora, j: j }])) return '✗ No se ha podido guardar. Se intentará otra vez si borras el estado.';
+  return '✓ Clase añadida: ' + nombre + ', los ' + DIAS_[dow - 1] + ' de ' + hs + ' a ' + he + ' (' + cuat + '.º cuatrimestre).';
+}
+
+function apuntesBandeja_(x, nombre, d, uni) {
+  if (!nombre) return '✗ Falta la asignatura (columna «nombre»).';
+  const w = sinAcentos_(x.donde);
+  const sitio = /mama|madre/.test(w) ? 'mama' : /papa|padre/.test(w) ? 'papa' : /mochila/.test(w) ? 'mochila' : '';
+  if (w && !sitio) return '✗ «dónde» tiene que ser mamá, papá o mochila.';
+  const ya = d.entradas.find(e => e.j.folder === uni.id && e.j.t === 'apunte' && sinAcentos_(e.j.title) === sinAcentos_(nombre));
+  const ahora = Date.now();
+  const j = ya ? Object.assign({}, ya.j) : { folder: uni.id, t: 'apunte', title: nombre.slice(0, 80), body: '', pos: siguientePos_(d, uni.id), created: ahora };
+  j.cat = sitio || j.cat || 'mochila';
+  j.updated = ahora;
+  if (!guardar_([{ k: 'e:' + (ya ? ya.id : nuevoId_()), b: ya ? ya.ver : 0, t: ahora, j: j }])) return '✗ No se ha podido guardar. Se intentará otra vez si borras el estado.';
+  const lugar = { mama: 'casa de mamá', papa: 'casa de papá', mochila: 'la mochila' }[j.cat];
+  return '✓ ' + (ya ? 'Apuntes movidos: ' : 'Apuntes añadidos: ') + nombre + ', en ' + lugar + '.';
+}
+
+function siguientePos_(d, fid) { let m = 0; for (const e of d.entradas) if (e.j.folder === fid && Number(e.j.pos) > m) m = Number(e.j.pos); return m + 1000; }
+
+// 'AAAA-MM-DD' a partir de «18/11/2026», «18/11», «2026-11-18», «hoy», «mañana» o «pasado mañana».
+function fechaDe_(v) {
+  const s = sinAcentos_(v);
+  if (!s) return '';
+  if (s === 'hoy') return diaMas_(0);
+  if (s === 'manana') return diaMas_(1);
+  if (s === 'pasado manana') return diaMas_(2);
+  let y, m, dd, r;
+  if ((r = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s))) { y = +r[1]; m = +r[2]; dd = +r[3]; }
+  else if ((r = /^(\d{1,2})[\/.\-](\d{1,2})(?:[\/.\-](\d{2}|\d{4}))?$/.exec(s))) {
+    dd = +r[1]; m = +r[2];
+    const hoy = hoy_();
+    y = r[3] ? (r[3].length === 2 ? 2000 + Number(r[3]) : Number(r[3])) : Number(hoy.slice(0, 4));
+    if (!r[3] && y + '-' + String(m).padStart(2, '0') + '-' + String(dd).padStart(2, '0') < hoy) y++;   // «18/1» en noviembre = enero que viene
+  } else return '';
+  const f = new Date(Date.UTC(y, m - 1, dd));
+  if (f.getUTCFullYear() !== y || f.getUTCMonth() !== m - 1 || f.getUTCDate() !== dd) return '';
+  return y + '-' + String(m).padStart(2, '0') + '-' + String(dd).padStart(2, '0');
+}
+// 'HH:MM' a partir de «10:00», «10.30», «10h», «10».
+function horaDe_(v) {
+  const r = /^(\d{1,2})(?:[:.h](\d{2}))?\s*h?$/.exec(String(v || '').trim().toLowerCase());
+  if (!r || +r[1] > 23 || +(r[2] || 0) > 59) return '';
+  return String(r[1]).padStart(2, '0') + ':' + (r[2] || '00');
 }
 
 function construir_(k, rev, ver, editado, del, j, json) {
