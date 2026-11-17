@@ -1001,7 +1001,7 @@ const ls = {
   set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } },
   ok(){ try { localStorage.setItem('miespacio.t', '1'); localStorage.removeItem('miespacio.t'); return true; } catch (e) { return false; } }
 };
-const APP_VER = '17 nov 2026 (2)';           // se enseña en Configuración para saber qué versión tiene cada dispositivo
+const APP_VER = '17 nov 2026 (3)';           // se enseña en Configuración para saber qué versión tiene cada dispositivo
 const K_CACHE = 'miespacio.cache.v1';   // copia de lo sincronizado, solo para abrir rápido
 const K_LOCAL = 'miespacio.local.v1';   // almacén principal en modo local
 
@@ -2212,7 +2212,7 @@ function openItemForm({ id = null, kind = 'notes', preset = null } = {}){
       <label class="field"><span>Descripción (opcional)</span><input class="inp" id="fmDesc" maxlength="40" autocomplete="off" enterkeyhint="${isLink ? 'next' : 'done'}" ${isLink ? 'data-next="fmUrl"' : ''} placeholder="${isLink ? 'Ej. Apuntes y notas' : 'Ej. Estudios'}"></label>`}
       ${isLink
         ? `<label class="field"><span>Enlace</span><input class="inp" id="fmUrl" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="https://…"></label>`
-                : fixed ? (st.kind === 'media' ? '<p class="seg-note" style="margin:-6px 4px 18px">Apunta lo que quieres ver, leer o aprender. Lo vas pasando a «En curso» y a «Terminado», y le pones nota.</p>' : st.kind === 'split' ? '<p class="seg-note" style="margin:-6px 4px 18px">Para un piso, un viaje o una cena: apuntas quién paga cada cosa y la app calcula quién debe a quién. Haz una sección por grupo.</p>' : st.kind === 'habits' ? '<p class="seg-note" style="margin:-6px 4px 18px">Dentro añades tus hábitos (gimnasio, leer…) y los marcas cada día. Verás la racha y un calendario de cada uno.</p>' : st.kind === 'uni' ? '<p class="seg-note" style="margin:-6px 4px 18px">Arriba verás lo próximo de tu calendario «Universidad» de Google Calendar; debajo, enlaces, profesores y notas.</p>' : '<p class="seg-note" style="margin:0 4px 18px">Muestra lo que tienes hoy en Google Calendar. Tócalo para ver los próximos 7 días.</p>')
+                : fixed ? (st.kind === 'media' ? '<p class="seg-note" style="margin:-6px 4px 18px">Apunta lo que quieres ver, leer o aprender. Lo vas pasando a «En curso» y a «Terminado», y le pones nota.</p>' : st.kind === 'split' ? '<p class="seg-note" style="margin:-6px 4px 18px">Para un piso, un viaje o una cena: apuntas quién paga cada cosa y la app calcula quién debe a quién. Haz una sección por grupo.</p>' : st.kind === 'habits' ? '<p class="seg-note" style="margin:-6px 4px 18px">Dentro añades tus hábitos (gimnasio, leer…) y los marcas cada día. Verás la racha y un calendario de cada uno.</p>' : st.kind === 'uni' ? '<p class="seg-note" style="margin:-6px 4px 18px">Arriba verás tus próximos exámenes del calendario «Universidad» de Google Calendar; debajo, tu horario por cuatrimestres, dónde tienes los apuntes y tus profesores.</p>' : '<p class="seg-note" style="margin:0 4px 18px">Muestra lo que tienes hoy en Google Calendar. Tócalo para ver los próximos 7 días.</p>')
         : `<div class="field"><span id="fmTypeL">Tipo de carpeta</span><div class="seg" role="group" aria-labelledby="fmTypeL"><button type="button" data-k="notes">Notas</button><button type="button" data-k="copy">Copiado rápido</button><button type="button" data-k="list">Lista</button><button type="button" data-k="money">Finanzas</button></div><p class="seg-note" id="fmTypeNote"></p></div>`}
       <div class="field"><span>Color</span>${swatchesHTML(st.color)}</div>
       ${isCal ? '' : `<div class="field"><span>Icono</span><div class="icons">${iconGrid(st.icon)}</div></div>`}
@@ -2834,10 +2834,10 @@ function migrate(){
     // 2: la carpeta Universidad pasa a ser la sección de Universidad (sus notas se quedan) y aparece el widget de calendario.
     if (!vals.some(i => i.kind === 'uni')) {
       const u = h.items.universidad;
-      if (u && u.kind === 'notes') { u.kind = 'uni'; u.calName = 'Universidad'; if (!u.color) u.color = 'lavanda'; if (u.desc === 'Estudios') u.desc = 'Exámenes'; }
+      if (u && u.kind === 'notes') { u.kind = 'uni'; u.calName = 'Universidad'; if (!u.color) u.color = 'lavanda'; if (u.desc === 'Estudios') u.desc = 'Clases'; }
       else if (!h.items['universidad-uni']) {
         const id = 'universidad-uni';
-        h.items[id] = { id, kind: 'uni', name: 'Universidad', desc: 'Exámenes', icon: 'graduation-cap', url: '', color: 'lavanda', calName: 'Universidad' };
+        h.items[id] = { id, kind: 'uni', name: 'Universidad', desc: 'Clases', icon: 'graduation-cap', url: '', color: 'lavanda', calName: 'Universidad' };
         h.order.splice(Math.min(2, h.order.length), 0, id);
       }
     }
