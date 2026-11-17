@@ -8,8 +8,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Mi espacio">
-<link rel="apple-touch-icon" href="icon-180.png">
-<link rel="icon" type="image/png" href="icon-180.png">
+<link rel="apple-touch-icon" id="appleIcon" href="icon-180.png">
+<link rel="icon" type="image/png" id="favIcon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
 <title>Mi espacio</title>
 <style>
@@ -1001,7 +1001,7 @@ const ls = {
   set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } },
   ok(){ try { localStorage.setItem('miespacio.t', '1'); localStorage.removeItem('miespacio.t'); return true; } catch (e) { return false; } }
 };
-const APP_VER = '17 nov 2026 (3)';           // se enseña en Configuración para saber qué versión tiene cada dispositivo
+const APP_VER = '17 nov 2026 (4)';           // se enseña en Configuración para saber qué versión tiene cada dispositivo
 const K_CACHE = 'miespacio.cache.v1';   // copia de lo sincronizado, solo para abrir rápido
 const K_LOCAL = 'miespacio.local.v1';   // almacén principal en modo local
 
@@ -1722,6 +1722,9 @@ const Theme = {
     document.documentElement.classList.toggle('light', light);
     const tc = $('meta[name="theme-color"]'); if (tc) tc.content = light ? '#ffffff' : '#000000';
     const cs = $('meta[name="color-scheme"]'); if (cs) cs.content = light ? 'light' : 'dark';
+    // icono: blanco con letra negra en claro, negro con letra blanca en oscuro (el iPhone guarda el que haya al añadirla a la pantalla de inicio)
+    const ic = light ? 'icon-180-claro.png' : 'icon-180.png';
+    ['#appleIcon', '#favIcon'].forEach(sel => { const l = $(sel); if (l && l.getAttribute('href') !== ic) l.setAttribute('href', ic); });
   },
   set(v){ ls.set(K_TEMA, v); this.refresh(); },
   refresh(){ this.apply(); lastHome = ''; lastFolder = ''; lastMoney = ''; lastGroup = ''; lastUni = ''; render(); },

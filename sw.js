@@ -2,8 +2,8 @@
  * Guarda una copia de la propia app (la página y el icono) en el dispositivo.
  * Con internet siempre se pide la versión más nueva; sin internet (o si tarda mucho) se abre la copia.
  * Aquí no se guarda ningún dato tuyo: las notas viajan aparte, entre la app y tu hoja de Google. */
-const CACHE = 'miespacio-app-v1';
-const BASICO = ['./', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png'];
+const CACHE = 'miespacio-app-v2';
+const BASICO = ['./', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png', 'icon-180-claro.png', 'icon-512-claro.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(BASICO)).then(() => self.skipWaiting()));
